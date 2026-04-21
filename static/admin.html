@@ -213,34 +213,62 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 </div>
 
 <script>
-const ACCOUNTS=[
-  {user:'admin',pass:'admin123',name:'系統管理員'},
-  {user:'staff',pass:'staff456',name:'業務人員'},
-];
-let currentUser=null;
+let currentUser=null, adminToken='', APPS=[], statsData={};
 
-function doLogin(){
+async function doLogin(){
   const u=document.getElementById('login-user').value.trim();
   const p=document.getElementById('login-pass').value;
   const err=document.getElementById('login-err');
-  const account=ACCOUNTS.find(a=>a.user===u&&a.pass===p);
-  if(!account){
-    err.style.display='block';
-    ['login-user','login-pass'].forEach(id=>document.getElementById(id).classList.add('err'));
-    return;
-  }
-  currentUser=account;err.style.display='none';
-  document.getElementById('login-screen').style.display='none';
-  document.getElementById('dashboard').style.display='block';
-  document.getElementById('user-name').textContent=account.name;
-  renderAdmin();
+  const btn=document.querySelector('.login-btn');
+  err.style.display='none';btn.textContent='登入中...';btn.disabled=true;
+  try{
+    const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
+    if(!res.ok){
+      err.textContent='帳號或密碼錯誤';err.style.display='block';
+      ['login-user','login-pass'].forEach(id=>document.getElementById(id).classList.add('err'));
+      return;
+    }
+    const data=await res.json();
+    adminToken=data.access_token;
+    localStorage.setItem('jb_admin_token',adminToken);
+    currentUser={name:data.display_name};
+    err.style.display='none';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    document.getElementById('user-name').textContent=data.display_name;
+    await loadAdminData();renderAdmin();
+  }catch{err.textContent='連線失敗，請稍後再試';err.style.display='block';}
+  finally{btn.textContent='登入';btn.disabled=false;}
 }
 function doLogout(){
-  currentUser=null;
+  adminToken='';APPS=[];statsData={};currentUser=null;
+  localStorage.removeItem('jb_admin_token');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('dashboard').style.display='none';
   ['login-user','login-pass'].forEach(id=>{const el=document.getElementById(id);el.value='';el.classList.remove('err');});
 }
+async function loadAdminData(){
+  const h={'Authorization':'Bearer '+adminToken};
+  const [ar,sr]=await Promise.all([fetch('/api/admin/applications?per_page=200',{headers:h}),fetch('/api/admin/stats',{headers:h})]);
+  if(ar.status===401){doLogout();return;}
+  if(ar.ok)APPS=await ar.json();
+  if(sr.ok)statsData=await sr.json();
+}
+async function approveApp(id){
+  if(!confirm('確定核准此申請？'))return;
+  const res=await fetch(`/api/admin/applications/${id}/status`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken},body:JSON.stringify({status:'approved'})});
+  if(res.ok){await loadAdminData();renderAdmin();}else alert('操作失敗，請重試');
+}
+async function rejectApp(id){
+  const note=prompt('退回原因（可留空）：');if(note===null)return;
+  const res=await fetch(`/api/admin/applications/${id}/status`,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+adminToken},body:JSON.stringify({status:'rejected',admin_note:note||null})});
+  if(res.ok){await loadAdminData();renderAdmin();}else alert('操作失敗，請重試');
+}
+function fmtDate(d){return d?new Date(d).toLocaleDateString('zh-TW'):'—';}
+window.addEventListener('DOMContentLoaded',async()=>{
+  const saved=localStorage.getItem('jb_admin_token');
+  if(saved){adminToken=saved;try{await loadAdminData();if(APPS){document.getElementById('login-screen').style.display='none';document.getElementById('dashboard').style.display='block';renderAdmin();}}catch{}}
+});
 
 const STEPS=[
   {id:1,icon:'💳',title:'金流申請',desc:'品牌資訊與金流選擇'},
@@ -260,15 +288,6 @@ const PAYMENT_OPTIONS=[
   {id:'ipass',label:'iPASS / TWQR',      icon:'🟡'},
   {id:'green',label:'綠界金流',           icon:'🟢'},
 ];
-const CLIENTS=[
-  {id:1,name:'鯨躍美食廣場',en:'WhaleEats',taxId:'12345678',email:'service@whaleeats.com',progress:5,status:'approved',plan:'B',years:2,updated:'2024-03-15',payments:['cc','apple','line']},
-  {id:2,name:'星光瑜珈工作室',en:'Starlight Yoga',taxId:'23456789',email:'info@staryoga.tw',progress:3,status:'reviewing',plan:'A',years:1,updated:'2024-03-18',payments:['cc']},
-  {id:3,name:'綠意寵物沙龍',en:'Green Pet Salon',taxId:'34567890',email:'hello@greenpet.com',progress:2,status:'in_progress',plan:'A',years:3,updated:'2024-03-20',payments:['green']},
-  {id:4,name:'優雅鋼琴教室',en:'Elegant Piano',taxId:'45678901',email:'contact@elegantpiano.tw',progress:4,status:'reviewing',plan:'C',years:1,updated:'2024-03-21',payments:['cc','line','ipass']},
-  {id:5,name:'快速剪接工作室',en:'QuickCut Studio',taxId:'56789012',email:'hi@quickcut.io',progress:1,status:'in_progress',plan:'A',years:2,updated:'2024-03-22',payments:['cc','apple']},
-  {id:6,name:'傳統漢方養生館',en:'HanFang Wellness',taxId:'67890123',email:'care@hanfang.com.tw',progress:2,status:'rejected',plan:'A',years:1,updated:'2024-03-19',payments:['green']},
-  {id:7,name:'美好生活股份有限公司',en:'Good Life',taxId:'78901234',email:'wu@goodlife.tw',progress:4,status:'reviewing',plan:'C',years:2,updated:'2024-03-23',payments:['cc','line']},
-];
 const ST={in_progress:{l:'進行中',c:'b-ip'},reviewing:{l:'審核中',c:'b-rv'},approved:{l:'已完成',c:'b-ok'},rejected:{l:'需修正',c:'b-rej'}};
 const FC={approved:'var(--green)',rejected:'var(--red)',reviewing:'var(--blue)',in_progress:'var(--amber)'};
 
@@ -276,10 +295,10 @@ let aFilter='all',expId=null;
 function renderAdmin(){renderStats();renderFilters();renderCL();}
 function renderStats(){
   document.getElementById('stats').innerHTML=[
-    {l:'總客戶數',v:CLIENTS.length,c:'var(--gold-d)',bc:'var(--gold)'},
-    {l:'審核中',v:CLIENTS.filter(c=>c.status==='reviewing').length,c:'var(--blue-d)',bc:'var(--blue)'},
-    {l:'已完成',v:CLIENTS.filter(c=>c.status==='approved').length,c:'var(--green)',bc:'var(--green)'},
-    {l:'需修正',v:CLIENTS.filter(c=>c.status==='rejected').length,c:'var(--red)',bc:'var(--red)'},
+    {l:'總客戶數',v:statsData.total??APPS.length,c:'var(--gold-d)',bc:'var(--gold)'},
+    {l:'審核中',v:statsData.reviewing??0,c:'var(--blue-d)',bc:'var(--blue)'},
+    {l:'已完成',v:statsData.approved??0,c:'var(--green)',bc:'var(--green)'},
+    {l:'需修正',v:statsData.rejected??0,c:'var(--red)',bc:'var(--red)'},
   ].map(s=>`<div class="stat" style="border-top-color:${s.bc}"><div class="stat-v" style="color:${s.c}">${s.v}</div><div class="stat-l">${s.l}</div></div>`).join('');
 }
 function renderFilters(){
@@ -290,22 +309,22 @@ function renderFilters(){
 function setF(f){aFilter=f;renderFilters();renderCL();}
 function renderCL(){
   const q=(document.getElementById('si')?.value||'').toLowerCase();
-  const list=CLIENTS.filter(c=>(aFilter==='all'||c.status===aFilter)&&(!q||c.name.includes(q)||c.en.toLowerCase().includes(q)||c.email.includes(q)||c.taxId.includes(q)));
+  const list=APPS.filter(c=>(aFilter==='all'||c.status===aFilter)&&(!q||(c.brand_name_zh||'').includes(q)||(c.brand_name_en||'').toLowerCase().includes(q)||(c.contact_email||'').includes(q)||(c.tax_id||'').includes(q)));
   document.getElementById('cl').innerHTML=list.length===0
     ?`<div style="text-align:center;padding:48px;color:var(--text3)">沒有符合條件的客戶</div>`
     :list.map(c=>{
-      const st=ST[c.status],pct=Math.round(c.progress/STEPS.length*100),fc=FC[c.status]||'var(--text3)',exp=expId===c.id;
-      const payIcons=(c.payments||[]).map(id=>PAYMENT_OPTIONS.find(p=>p.id===id)?.icon||'').join(' ');
-      const invYear=INV.find(p=>p.plan===c.plan)?.year||0;
+      const st=ST[c.status]||{l:c.status,c:''},pct=Math.round(c.current_step/STEPS.length*100),fc=FC[c.status]||'var(--text3)',exp=expId===c.id;
+      const payIcons=(c.payment_methods||[]).map(id=>PAYMENT_OPTIONS.find(p=>p.id===id)?.icon||'').join(' ');
+      const invYear=INV.find(p=>p.plan===c.invoice_plan)?.year||0;
       return `<div class="cc ${exp?'exp':''}" onclick="toggleCC(${c.id})">
         <div class="cr">
           <div>
-            <div class="cn">${c.name} <span style="font-size:12px;color:var(--text3);font-weight:400">${c.en}</span></div>
-            <div class="cm">統編：${c.taxId} ｜ ${c.email}<br>方案 ${c.plan}・${c.years}年 ｜ 金流：${payIcons} ｜ 更新：${c.updated}</div>
+            <div class="cn">${c.brand_name_zh||'（未填寫）'} <span style="font-size:12px;color:var(--text3);font-weight:400">${c.brand_name_en||''}</span></div>
+            <div class="cm">統編：${c.tax_id} ｜ ${c.contact_email||'—'}<br>方案 ${c.invoice_plan||'—'}・${c.contract_years}年 ｜ 金流：${payIcons||'—'} ｜ 更新：${fmtDate(c.updated_at)}</div>
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:16px">
             <span class="badge ${st.c}">${st.l}</span>
-            <div style="font-size:11px;color:var(--text3);margin-top:6px">步驟 ${c.progress} / ${STEPS.length}</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:6px">步驟 ${c.current_step} / ${STEPS.length}</div>
           </div>
         </div>
         <div class="mini-track"><div class="mini-fill" style="width:${pct}%;background:${fc}"></div></div>
@@ -313,27 +332,25 @@ function renderCL(){
           <div class="dp-label">申請明細</div>
           <div class="detail-table">
             ${[
-              ['統編',c.taxId],
-              ['品牌名稱',c.name+' ('+c.en+')'],
-              ['申請金流',(c.payments||[]).map(id=>{const p=PAYMENT_OPTIONS.find(x=>x.id===id);return (p?.icon||'')+' '+(p?.label||'');}).join('、')||'—'],
-              ['發票方案','方案 '+c.plan+'・'+(INV.find(p=>p.plan===c.plan)?.vol||0).toLocaleString()+' 張/月'],
-              ['合約',c.years+'年 ／ 年費 $'+invYear.toLocaleString()+' × '+c.years+' = $'+(invYear*c.years).toLocaleString()],
-              ['聯絡信箱',c.email],
+              ['統編',c.tax_id],
+              ['品牌名稱',(c.brand_name_zh||'—')+' ('+(c.brand_name_en||'—')+')'],
+              ['申請金流',(c.payment_methods||[]).map(id=>{const p=PAYMENT_OPTIONS.find(x=>x.id===id);return (p?.icon||'')+' '+(p?.label||id);}).join('、')||'—'],
+              ['發票方案',c.invoice_plan?'方案 '+c.invoice_plan+'・'+(INV.find(p=>p.plan===c.invoice_plan)?.vol||0).toLocaleString()+' 張/月':'（未選擇）'],
+              ['合約',c.contract_years+'年 ／ 年費 $'+invYear.toLocaleString()+' × '+c.contract_years+' = $'+(invYear*c.contract_years).toLocaleString()],
+              ['聯絡信箱',c.contact_email||'—'],
             ].map(([lbl,val])=>`<div class="d-row"><span class="d-lbl">${lbl}</span><span class="d-val">${val}</span></div>`).join('')}
           </div>
           <div class="dp-label">步驟狀態</div>
           <div class="ds">
-            ${STEPS.map(s=>`<div class="dsi ${s.id<=c.progress?'done':''}">
+            ${STEPS.map(s=>`<div class="dsi ${s.id<=c.current_step?'done':''}">
               <div class="dsi-ic">${s.icon}</div>
               <div class="dsi-nm">${s.title}</div>
-              <div class="dsi-st">${s.id<=c.progress?'✓ 完成':'待處理'}</div>
+              <div class="dsi-st">${s.id<=c.current_step?'✓ 完成':'待處理'}</div>
             </div>`).join('')}
           </div>
           <div class="ar">
-            <button class="btn btn-ok" onclick="alert('已核准：${c.name}')">✓ 核准</button>
-            <button class="btn btn-d" onclick="alert('已退回：${c.name}')">✗ 退回</button>
-            <button class="btn btn-n" onclick="alert('通知已寄至：${c.email}')">✉ 寄送通知</button>
-            <button class="btn btn-g" onclick="alert('查看 ${c.name} 完整資料')">📄 查看資料</button>
+            <button class="btn btn-ok" onclick="event.stopPropagation();approveApp(${c.id})">✓ 核准</button>
+            <button class="btn btn-d" onclick="event.stopPropagation();rejectApp(${c.id})">✗ 退回</button>
           </div>
         </div>
       </div>`;
