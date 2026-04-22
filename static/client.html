@@ -100,7 +100,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .doc-item:hover{border-color:var(--blue-m);background:var(--blue-l);}
 .doc-item.done{border-color:var(--green);background:var(--green-l);}
 .doc-left{display:flex;align-items:center;gap:10px;}
-.doc-num{width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text3);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1.5px solid var(--border);}
+.doc-num{width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--text3);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:none;}
 .doc-item.done .doc-num{background:var(--green);color:#fff;border-color:var(--green);}
 .doc-name{font-weight:600;font-size:14px;color:var(--text);}
 .doc-item.done .doc-name{color:var(--green);}
@@ -455,7 +455,7 @@ function getBody(step){
         <div class="doc-left">
           <div class="doc-num">${uploadedDocs.has(d.id)?'✓':(i+1)}</div>
           <div>
-            <div class="doc-name"><span style="color:var(--text2)">${d.icon}</span> ${d.name}${d.optional
+            <div class="doc-name" style="display:flex;align-items:center;gap:7px"><span style="color:var(--text2);flex-shrink:0">${d.icon}</span>${d.name}${d.optional
               ?`<span class="opt-tag">選填</span>`
               :`<span class="req-tag">*</span>`}</div>
             <div class="doc-sub">${d.sub}</div>
