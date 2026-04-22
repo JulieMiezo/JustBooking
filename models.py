@@ -52,6 +52,9 @@ class ClientApplication(Base):
     brand_name_en   = Column(String(100), comment="品牌英文名稱")
     contact_email   = Column(String(150), comment="客服信箱")
     contact_phone   = Column(String(20), comment="客服電話")
+    contact_person  = Column(String(50), comment="聯絡人")
+    store_phone     = Column(String(20), comment="商店電話")
+    store_address   = Column(String(200), comment="營業地址")
 
     # 金流申請
     payment_methods = Column(JSON, default=list, comment="申請金流項目 ['cc','apple','line',...]")

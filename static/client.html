@@ -367,6 +367,7 @@ const ST={in_progress:{l:'進行中'},reviewing:{l:'審核中'},approved:{l:'已
 
 let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set();
 let formTaxId='',formBrandZh='',formBrandEn='',formEmail='',formPhone='';
+let formContact='',formStorePhone='',formAddress='';
 
 function calcPrice(){
   const p=INV[sliderIdx],y=YEARS[yearIdx];
@@ -402,14 +403,22 @@ function getBody(step){
     <div class="fg" style="margin-bottom:20px;">
       <div class="fg2">
         <div class="field"><label>統一編號 *</label><input id="f-taxid" maxlength="8" placeholder="8 碼數字統編" value="${formTaxId}" oninput="this.style.borderColor=''"></div>
-        <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="可為市話或手機" value="${formPhone}"></div>
+        <div class="field"><label>聯絡人</label><input id="f-contact" placeholder="例：王小明" value="${formContact}"></div>
       </div>
       <div class="fg2">
         <div class="field"><label>品牌名稱（中文）*</label><input id="f-brand-zh" placeholder="例：揪預約好空間" value="${formBrandZh}"></div>
         <div class="field"><label>品牌名稱（英文）</label><input id="f-brand-en" placeholder="例：JustBooking" value="${formBrandEn}"></div>
       </div>
-      <div class="field"><label>客服信箱 *</label><input id="f-email" type="email" placeholder="例：service@example.com" value="${formEmail}"></div>
+      <div class="fg2">
+        <div class="field"><label>客服信箱 *</label><input id="f-email" type="email" placeholder="例：service@example.com" value="${formEmail}"></div>
+        <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="市話或手機" value="${formPhone}"></div>
+      </div>
+      <div class="fg2">
+        <div class="field"><label>商店電話</label><input id="f-store-phone" placeholder="例：02-12345678" value="${formStorePhone}"></div>
+        <div class="field"><label>營業地址</label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}"></div>
+      </div>
     </div>
+    ${selectedPayments.has('cc')?`
     <div class="notice notice-blue">📋 請先點擊下方按鈕填寫藍新金流申請表，填寫完成後回到此頁繼續選擇金流項目。</div>
     <div class="pay-box">
       <div class="pay-box-icon"><img src="/static/neweb.png" style="height:44px;object-fit:contain"></div>
@@ -417,7 +426,7 @@ function getBody(step){
       <div class="pay-box-desc">點擊下方按鈕，將在新分頁開啟申請表單<br>填寫完成後請回到此頁繼續後續步驟</div>
       <a href="https://gobooking.tw/payment/index.html" target="_blank" class="pay-link">開啟申請表單 ↗</a>
       <div class="pay-link-hint">填寫完成後請回到此頁，點「下一步」繼續</div>
-    </div>
+    </div>`:''}
     <div style="border-top:1px solid var(--border);padding-top:18px;">
       <div class="section-title"><img src="/static/neweb.png" style="height:14px;vertical-align:middle;object-fit:contain;margin-right:4px"> 選擇申請的金流項目</div>
       ${PAYMENT_OPTIONS.map(p=>{
@@ -556,11 +565,14 @@ function toggleDoc(id){
 }
 function toggleAddon(id){if(addons.has(id))addons.delete(id);else addons.add(id);renderStep();}
 function saveStep1Fields(){
-  const t=document.getElementById('f-taxid');   if(t)formTaxId=t.value;
-  const z=document.getElementById('f-brand-zh');if(z)formBrandZh=z.value;
-  const e=document.getElementById('f-brand-en');if(e)formBrandEn=e.value;
-  const m=document.getElementById('f-email');   if(m)formEmail=m.value;
-  const p=document.getElementById('f-phone');   if(p)formPhone=p.value;
+  const t=document.getElementById('f-taxid');      if(t)formTaxId=t.value;
+  const z=document.getElementById('f-brand-zh');   if(z)formBrandZh=z.value;
+  const e=document.getElementById('f-brand-en');   if(e)formBrandEn=e.value;
+  const m=document.getElementById('f-email');      if(m)formEmail=m.value;
+  const p=document.getElementById('f-phone');      if(p)formPhone=p.value;
+  const c=document.getElementById('f-contact');    if(c)formContact=c.value;
+  const s=document.getElementById('f-store-phone');if(s)formStorePhone=s.value;
+  const a=document.getElementById('f-address');    if(a)formAddress=a.value;
 }
 function togglePay(id){
   if(cur===1)saveStep1Fields();
@@ -589,15 +601,19 @@ async function next(){
     const brandEn=(document.getElementById('f-brand-en')?.value||'').trim();
     const email=(document.getElementById('f-email')?.value||'').trim();
     const phone=(document.getElementById('f-phone')?.value||'').trim();
+    const contact=(document.getElementById('f-contact')?.value||'').trim();
+    const storePhone=(document.getElementById('f-store-phone')?.value||'').trim();
+    const address=(document.getElementById('f-address')?.value||'').trim();
     if(!taxId||!/^\d{8}$/.test(taxId)){document.getElementById('f-taxid').style.borderColor='var(--red)';alert('請輸入正確的 8 碼統編');return;}
     if(!brandZh){alert('請填寫品牌名稱（中文）');return;}
     if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('請輸入正確的信箱格式');return;}
     if(!email){alert('請填寫客服信箱');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
-      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,payment_methods:[...selectedPayments],payment_form_submitted:true})});
+      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_phone:storePhone||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
       formTaxId=taxId;formBrandZh=brandZh;formBrandEn=brandEn;formEmail=email;formPhone=phone;
+      formContact=contact;formStorePhone=storePhone;formAddress=address;
       cur++;renderStep();
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
@@ -644,6 +660,7 @@ function prev(){if(cur>1){cur--;renderStep();}}
 function resetForm(){
   cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
+  formContact='';formStorePhone='';formAddress='';
   document.getElementById('fw').style.display='block';document.getElementById('success').style.display='none';
   showLanding();
 }

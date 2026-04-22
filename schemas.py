@@ -22,6 +22,9 @@ class Step1PaymentSchema(BaseModel):
     brand_name_en:        Optional[str] = Field(None, max_length=100)
     contact_email:        Optional[EmailStr] = None
     contact_phone:        Optional[str] = Field(None, max_length=20)
+    contact_person:       Optional[str] = Field(None, max_length=50)
+    store_phone:          Optional[str] = Field(None, max_length=20)
+    store_address:        Optional[str] = Field(None, max_length=200)
     payment_methods:      List[str] = Field(default_factory=list, description="['cc','apple','line','ipass','green']")
     payment_form_submitted: bool = False
 
@@ -60,6 +63,9 @@ class ApplicationQueryOut(BaseModel):
     brand_name_zh:    Optional[str]
     brand_name_en:    Optional[str]
     contact_email:    Optional[str]
+    contact_person:   Optional[str]
+    store_phone:      Optional[str]
+    store_address:    Optional[str]
     payment_methods:  List[str]
     invoice_plan:     Optional[str]
     contract_years:   int
@@ -99,6 +105,9 @@ class ApplicationListItem(BaseModel):
 
 class ApplicationDetail(ApplicationListItem):
     contact_phone:      Optional[str]
+    contact_person:     Optional[str]
+    store_phone:        Optional[str]
+    store_address:      Optional[str]
     invoice_year_fee:   int
     setup_fee:          int
     addon_print_invoice: bool
