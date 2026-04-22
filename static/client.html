@@ -338,7 +338,7 @@ const ICO={
 };
 const STEPS=[
   {id:1,icon:ICO.cc,   title:'金流申請',  desc:'填寫品牌基本資訊與選擇金流服務'},
-  {id:2,icon:ICO.folder,title:'上傳影像文件',desc:'營業登記、身分證、存摺、Logo、場域圖'},
+  {id:2,icon:ICO.image, title:'上傳影像文件',desc:'營業登記、身分證、存摺、Logo、場域圖'},
   {id:3,icon:ICO.file,  title:'發票方案',  desc:'選擇方案與合約年限，自動計算優惠'},
   {id:4,icon:ICO.plus,  title:'加值服務',  desc:'中獎發票列印、統編寄送等加購選項'},
   {id:5,icon:ICO.check, title:'確認送出',  desc:'核對所有資料後完成申請'},
@@ -455,9 +455,7 @@ function getBody(step){
         <div class="doc-left">
           <div class="doc-num">${uploadedDocs.has(d.id)?'✓':(i+1)}</div>
           <div>
-            <div class="doc-name" style="display:flex;align-items:center;gap:7px"><span style="color:var(--text2);flex-shrink:0">${d.icon}</span>${d.name}${d.optional
-              ?`<span class="opt-tag">選填</span>`
-              :`<span class="req-tag">*</span>`}</div>
+            <div class="doc-name">${d.name}${d.optional?'': `<span class="req-tag">*</span>`}</div>
             <div class="doc-sub">${d.sub}</div>
           </div>
         </div>
