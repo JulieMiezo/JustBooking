@@ -41,13 +41,15 @@ app.include_router(upload.router,  prefix="/api/upload",  tags=["檔案上傳"])
 # 靜態檔案
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
+NO_CACHE = {"Cache-Control": "no-cache, no-store, must-revalidate", "Pragma": "no-cache"}
+
 @app.get("/")
 def serve_client():
-    return FileResponse(os.path.join(BASE_DIR, "static/client.html"))
+    return FileResponse(os.path.join(BASE_DIR, "static/client.html"), headers=NO_CACHE)
 
 @app.get("/admin")
 def serve_admin():
-    return FileResponse(os.path.join(BASE_DIR, "static/admin.html"))
+    return FileResponse(os.path.join(BASE_DIR, "static/admin.html"), headers=NO_CACHE)
 
 @app.get("/health")
 def health_check():
