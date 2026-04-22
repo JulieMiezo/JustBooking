@@ -346,8 +346,8 @@ const VOLS=[500,1000,3000,5000,10000,15000,20000];
 const YEARS=[{y:1,setup:3000},{y:2,setup:3000,featured:true},{y:3,setup:3000}];
 const PAYMENT_OPTIONS=[
   {id:'cc',   name:'信用卡 - 藍新金流', label:'信用卡 - 藍新金流 <img src="/static/neweb.png" style="height:24px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:'green'},
-  {id:'apple',name:'Apple Pay',  label:'<img src="/static/Apple_Pay.svg" style="max-height:24px;width:auto;vertical-align:middle"> <span style="font-size:12px;color:var(--text2)"> 需先選信用卡 - 藍新金流才可申請</span>', icon:'', note:'', depends:'cc', conflicts:null},
-  {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流 <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
+  {id:'apple',name:'Apple Pay',  label:'<img src="/static/Apple_Pay.svg" style="max-height:24px;width:auto;vertical-align:middle"> <span style="font-size:12px;color:var(--text2)">  需先選信用卡 - 藍新金流才可申請</span>', icon:'', note:'', depends:'cc', conflicts:null},
+  {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流  <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
 ];
@@ -411,12 +411,12 @@ function getBody(step){
       </div>
       <div class="fg2">
         <div class="field"><label>聯絡人 *</label><input id="f-contact" placeholder="例：王小明" value="${formContact}"></div>
-        <div class="field"><label>聯絡電話 *</label><input id="f-phone" placeholder="市話或手機" value="${formPhone}"></div>
+        <div class="field"><label>聯絡電話 *</label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^\d\-]/g,'')"></div>
       </div>
       <div class="field"><label>營業地址 *</label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}"></div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:18px;">
-      <div class="section-title"><img src="/static/neweb.png" style="height:14px;vertical-align:middle;object-fit:contain;margin-right:4px"> 選擇申請的金流項目</div>
+      <div class="section-title">${ICO.cc} 選擇申請的金流項目</div>
       ${PAYMENT_OPTIONS.map(p=>{
         const depDisabled=p.depends&&!selectedPayments.has(p.depends);
         const conflictDisabled=p.conflicts&&selectedPayments.has(p.conflicts);
