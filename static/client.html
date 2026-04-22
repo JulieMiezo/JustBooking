@@ -362,9 +362,10 @@ const ADDONS=[
   {id:'channel',name:'多通路整合服務費',desc:'每一通路每年 $3,000，每個統編預設一個通路',price:'$3,000 / 通路'},
 ];
 const DOCS=[
-  {id:'biz',  icon:ICO.bldg,   name:'營業登記文件',  sub:'需包含商業抄本'},
-  {id:'id',   icon:ICO.person, name:'負責人身分證件',sub:'正反面清晰掃描或拍照'},
-  {id:'bank', icon:ICO.bank,   name:'銀行存摺封面',  sub:'戶名需與企業名相同'},
+  {id:'biz',     icon:ICO.bldg,   name:'營業登記文件',       sub:'需包含商業抄本'},
+  {id:'id_front',icon:ICO.person, name:'負責人身分證件（正面）',sub:'清晰掃描或拍照', docType:'id'},
+  {id:'id_back', icon:ICO.person, name:'負責人身分證件（背面）',sub:'清晰掃描或拍照', docType:'id'},
+  {id:'bank',    icon:ICO.bank,   name:'銀行存摺封面',       sub:'戶名需與企業名相同'},
   {id:'logo', icon:ICO.star,   name:'Logo 圖檔',     sub:'PNG/SVG 透明背景，建議 300×300px 以上'},
   {id:'scene',icon:ICO.image,  name:'場域形象圖',    sub:'使用首頁服務才需上傳・手機版 375×655px・電腦版 1920×820px',optional:true},
 ];
@@ -463,8 +464,8 @@ function getBody(step){
       </div>`).join('')}
     <div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
       <span style="font-size:13px;color:var(--text2)">必要文件已上傳 </span>
-      <span style="font-size:13px;font-weight:700;color:var(--blue)">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length} / 4</span>
-      ${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length===4?'<span style="font-size:13px;color:var(--green);font-weight:700;margin-left:8px">✓ 必要文件齊全！</span>':''}
+      <span style="font-size:13px;font-weight:700;color:var(--blue)">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length} / 5</span>
+      ${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length===5?'<span style="font-size:13px;color:var(--green);font-weight:700;margin-left:8px">✓ 必要文件齊全！</span>':''}
     </div>`;
 
   if(step===3){
@@ -527,7 +528,7 @@ function getBody(step){
     <div class="summary-box">
       <div class="sum-row"><span class="sum-lbl">金流申請</span><span class="sum-val">✅ 已填寫</span></div>
       <div class="sum-row"><span class="sum-lbl">申請金流項目</span><span class="sum-val" style="font-size:13px;text-align:right;max-width:60%">${payLabels}</span></div>
-      <div class="sum-row"><span class="sum-lbl">上傳文件</span><span class="sum-val">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length>=4?'✅ 必要文件齊全':'⚠️ 必要文件未齊全'}</span></div>
+      <div class="sum-row"><span class="sum-lbl">上傳文件</span><span class="sum-val">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length>=5?'✅ 必要文件齊全':'⚠️ 必要文件未齊全'}</span></div>
       <div class="sum-row"><span class="sum-lbl">發票方案</span><span class="sum-val" style="color:var(--gold-d)">方案 ${c.p.plan} · ${c.p.vol.toLocaleString()} 張/月</span></div>
       <div class="sum-row"><span class="sum-lbl">合約年限</span><span class="sum-val">${c.y.y} 年</span></div>
       <div class="sum-row"><span class="sum-lbl">年費 × 年數</span><span class="sum-val">$${c.p.year.toLocaleString()} × ${c.y.y} = $${(c.p.year*c.y.y).toLocaleString()}</span></div>
@@ -555,7 +556,8 @@ function toggleDoc(id){
     const items=document.querySelectorAll('.doc-item');
     items.forEach(el=>{if(el.getAttribute('onclick')?.includes(`'${id}'`))el.style.opacity='0.5';});
     try{
-      const res=await fetch(`/api/upload/${formTaxId}/${id}`,{method:'POST',body:fd});
+      const doc=DOCS.find(d=>d.id===id);
+      const res=await fetch(`/api/upload/${formTaxId}/${doc?.docType||id}`,{method:'POST',body:fd});
       if(res.ok){uploadedDocs.add(id);renderStep();}
       else{const d=await res.json();alert(d.detail||'上傳失敗');}
     }catch{alert('上傳失敗，請稍後再試');}
