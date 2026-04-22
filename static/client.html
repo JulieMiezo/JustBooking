@@ -411,7 +411,7 @@ function getBody(step){
       </div>
       <div class="fg2">
         <div class="field"><label>聯絡人 *</label><input id="f-contact" placeholder="例：王小明" value="${formContact}"></div>
-        <div class="field"><label>聯絡電話 *</label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^\d\-]/g,'')"></div>
+        <div class="field"><label>聯絡電話 *</label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
       </div>
       <div class="field"><label>營業地址 *</label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}"></div>
     </div>
