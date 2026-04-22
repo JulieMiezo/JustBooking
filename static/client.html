@@ -254,7 +254,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <div onclick="showForm()" style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#fff;border:1.5px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);"
         onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(221,175,40,.15)'"
         onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow='var(--shadow)'">
-        <div style="width:48px;height:48px;border-radius:12px;background:var(--gold-l);border:1px solid var(--gold-m);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">📋</div>
+        <div style="width:48px;height:48px;border-radius:12px;background:var(--gold-l);border:1px solid var(--gold-m);display:flex;align-items:center;justify-content:center;flex-shrink:0">${ICO.file}</div>
         <div>
           <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:3px">我要新申請</div>
           <div style="font-size:13px;color:var(--text2)">尚未申請的新客戶，依步驟填寫建置資料</div>
@@ -425,7 +425,7 @@ function getBody(step){
         const iconHtml=p.icon.startsWith('http')||p.icon.startsWith('/')?`<img src="${p.icon}" style="width:20px;height:20px;object-fit:contain;vertical-align:middle">`:`<span style="font-size:18px">${p.icon}</span>`;
         const noteText=conflictDisabled?`不可與 ${PAYMENT_OPTIONS.find(x=>x.id===p.conflicts)?.name||''} 同時申請`:p.note;
         const payBox=p.id==='cc'&&checked?`
-          <div class="notice notice-blue" style="margin:8px 0 8px 29px">📋 請先點擊下方按鈕填寫藍新金流申請表，填寫完成後回到此頁繼續選擇金流項目。</div>
+          <div class="notice notice-blue" style="margin:8px 0 8px 29px;display:flex;align-items:center;gap:7px">${ICO.file} 請先點擊下方按鈕填寫藍新金流申請表，填寫完成後回到此頁繼續選擇金流項目。</div>
           <div class="pay-box" style="margin:0 0 10px 29px">
             <div class="pay-box-icon"><img src="/static/neweb.png" style="height:44px;object-fit:contain"></div>
             <div class="pay-box-title">藍新金流申請表</div>
@@ -606,6 +606,7 @@ async function next(){
     if(!brandEn){alert('請填寫品牌名稱（英文）');return;}
     if(!contact){alert('請填寫聯絡人');return;}
     if(!phone){alert('請填寫聯絡電話');return;}
+    {const d=phone.replace(/-/g,'');if(!/^0\d{8,9}$/.test(d)){alert('請輸入正確的電話格式，例如：02-12345678 或 0912-345678');return;}}
     if(!address){alert('請填寫營業地址');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
