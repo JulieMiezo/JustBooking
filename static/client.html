@@ -60,8 +60,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .sc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:22px;min-height:300px;}
 .sh{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);}
 .si{font-size:26px;color:var(--text2);}.st{font-size:17px;font-weight:700;color:var(--text);}.sd{font-size:13px;color:var(--text2);margin-top:2px;}
-.req-tag{font-size:10px;background:var(--red-l);color:var(--red);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px;border:1px solid rgba(224,85,85,.2);}
-.opt-tag{font-size:10px;background:var(--gold-l);color:var(--gold-d);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px;border:1px solid var(--gold-m);}
+.req-tag{font-size:10px;background:var(--red-l);color:var(--red);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:text-top;line-height:1;margin-left:4px;border:1px solid rgba(224,85,85,.2);}
+.opt-tag{font-size:10px;background:var(--gold-l);color:var(--gold-d);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:text-top;line-height:1;margin-left:4px;border:1px solid var(--gold-m);}
 
 /* Form */
 .fg{display:grid;gap:14px;}.fg2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -351,7 +351,7 @@ const VOLS=[500,1000,3000,5000,10000,15000,20000];
 const YEARS=[{y:1,setup:3000},{y:2,setup:3000,featured:true},{y:3,setup:3000}];
 const PAYMENT_OPTIONS=[
   {id:'cc',   name:'信用卡 - 藍新金流', label:'信用卡 - 藍新金流 <img src="/static/neweb.png" style="height:24px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:'green'},
-  {id:'apple',name:'Apple Pay',  label:'<img src="/static/Apple_Pay.svg" style="max-height:24px;width:auto;vertical-align:middle"> <span style="font-size:12px;color:var(--text2)">  需先選信用卡 - 藍新金流才可申請</span>', icon:'', note:'', depends:'cc', conflicts:null},
+  {id:'apple',name:'Apple Pay',  label:'<img src="/static/Apple_Pay.svg" style="max-height:24px;width:auto;vertical-align:middle"> <span style="font-size:12px;color:var(--text2);margin-left:8px"> 需先選信用卡 - 藍新金流才可申請</span>', icon:'', note:'', depends:'cc', conflicts:null},
   {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流  <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
