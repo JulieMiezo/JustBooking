@@ -385,7 +385,7 @@ function getBody(step){
     <div class="fg" style="margin-bottom:20px;">
       <div class="fg2">
         <div class="field"><label>統一編號 *</label><input id="f-taxid" maxlength="8" placeholder="8 碼數字統編" value="${formTaxId}" oninput="this.style.borderColor=''"></div>
-        <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="例：02 - 12345678" value="${formPhone}"></div>
+        <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="例：02-12345678 或 0912-345-678" value="${formPhone}"></div>
       </div>
       <div class="fg2">
         <div class="field"><label>品牌名稱（中文）*</label><input id="f-brand-zh" placeholder="例：揪預約好空間" value="${formBrandZh}"></div>
@@ -538,7 +538,15 @@ function toggleDoc(id){
   inp.click();
 }
 function toggleAddon(id){if(addons.has(id))addons.delete(id);else addons.add(id);renderStep();}
+function saveStep1Fields(){
+  const t=document.getElementById('f-taxid');   if(t)formTaxId=t.value;
+  const z=document.getElementById('f-brand-zh');if(z)formBrandZh=z.value;
+  const e=document.getElementById('f-brand-en');if(e)formBrandEn=e.value;
+  const m=document.getElementById('f-email');   if(m)formEmail=m.value;
+  const p=document.getElementById('f-phone');   if(p)formPhone=p.value;
+}
 function togglePay(id){
+  if(cur===1)saveStep1Fields();
   const opt=PAYMENT_OPTIONS.find(p=>p.id===id);
   if(opt?.depends&&!selectedPayments.has(opt.depends)){alert(`此選項需先選擇「${PAYMENT_OPTIONS.find(p=>p.id===opt.depends)?.name}」才能申請。`);return;}
   if(opt?.conflicts&&selectedPayments.has(opt.conflicts)){
