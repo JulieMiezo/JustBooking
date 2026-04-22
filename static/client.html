@@ -605,7 +605,7 @@ async function next(){
     const err=(id,msg)=>{document.getElementById(id).style.borderColor='var(--red)';alert(msg);};
     if(!taxId||!/^\d{8}$/.test(taxId)){err('f-taxid','請輸入正確的 8 碼統編');return;}
     if(!email){err('f-email','請填寫客服信箱');return;}
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err('f-email','請輸入正確的信箱格式');return;}
+    if(!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)){err('f-email','請輸入正確的信箱格式');return;}
     if(!brandZh){err('f-brand-zh','請填寫品牌名稱（中文）');return;}
     if(!brandEn){err('f-brand-en','請填寫品牌名稱（英文）');return;}
     if(!contact){err('f-contact','請填寫聯絡人');return;}
