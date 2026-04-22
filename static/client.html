@@ -453,7 +453,7 @@ function getBody(step){
         <div class="doc-left">
           <div class="doc-num">${uploadedDocs.has(d.id)?'✓':(i+1)}</div>
           <div>
-            <div class="doc-name">${d.icon} ${d.name}${d.optional
+            <div class="doc-name"><span style="color:var(--text3)">${d.icon}</span> ${d.name}${d.optional
               ?` <span style="font-size:10px;background:var(--gold-l);color:var(--gold-d);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:middle;border:1px solid var(--gold-m)">選填</span>`
               :`<span style="font-size:10px;background:var(--red-l);color:var(--red);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px">必填</span>`}</div>
             <div class="doc-sub">${d.sub}</div>
