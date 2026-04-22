@@ -345,9 +345,9 @@ const INV=[
 const VOLS=[500,1000,3000,5000,10000,15000,20000];
 const YEARS=[{y:1,setup:3000},{y:2,setup:3000,featured:true},{y:3,setup:3000}];
 const PAYMENT_OPTIONS=[
-  {id:'cc',   name:'信用卡 - 藍新金流', label:'信用卡 <img src="/static/neweb.png" style="height:24px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:'green'},
+  {id:'cc',   name:'信用卡 - 藍新金流', label:'信用卡 - 藍新金流 <img src="/static/neweb.png" style="height:24px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:'green'},
   {id:'apple',name:'Apple Pay',  label:'<img src="/static/Apple_Pay.svg" style="max-height:18px;width:auto;vertical-align:middle"> <span style="font-size:12px;color:var(--text2)">・需先選信用卡 - 藍新金流才可申請</span>', icon:'', note:'', depends:'cc', conflicts:null},
-  {id:'green',name:'綠界金流',   label:'信用卡 <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
+  {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流 <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
 ];
@@ -367,7 +367,7 @@ const ST={in_progress:{l:'進行中'},reviewing:{l:'審核中'},approved:{l:'已
 
 let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set();
 let formTaxId='',formBrandZh='',formBrandEn='',formEmail='',formPhone='';
-let formContact='',formStorePhone='',formAddress='';
+let formContact='',formAddress='';
 
 function calcPrice(){
   const p=INV[sliderIdx],y=YEARS[yearIdx];
@@ -413,10 +413,7 @@ function getBody(step){
         <div class="field"><label>客服信箱 *</label><input id="f-email" type="email" placeholder="例：service@example.com" value="${formEmail}"></div>
         <div class="field"><label>聯絡電話</label><input id="f-phone" placeholder="市話或手機" value="${formPhone}"></div>
       </div>
-      <div class="fg2">
-        <div class="field"><label>商店電話</label><input id="f-store-phone" placeholder="例：02-12345678" value="${formStorePhone}"></div>
-        <div class="field"><label>營業地址</label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}"></div>
-      </div>
+      <div class="field"><label>營業地址</label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}"></div>
     </div>
     ${selectedPayments.has('cc')?`
     <div class="notice notice-blue">📋 請先點擊下方按鈕填寫藍新金流申請表，填寫完成後回到此頁繼續選擇金流項目。</div>
@@ -571,7 +568,6 @@ function saveStep1Fields(){
   const m=document.getElementById('f-email');      if(m)formEmail=m.value;
   const p=document.getElementById('f-phone');      if(p)formPhone=p.value;
   const c=document.getElementById('f-contact');    if(c)formContact=c.value;
-  const s=document.getElementById('f-store-phone');if(s)formStorePhone=s.value;
   const a=document.getElementById('f-address');    if(a)formAddress=a.value;
 }
 function togglePay(id){
@@ -602,7 +598,6 @@ async function next(){
     const email=(document.getElementById('f-email')?.value||'').trim();
     const phone=(document.getElementById('f-phone')?.value||'').trim();
     const contact=(document.getElementById('f-contact')?.value||'').trim();
-    const storePhone=(document.getElementById('f-store-phone')?.value||'').trim();
     const address=(document.getElementById('f-address')?.value||'').trim();
     if(!taxId||!/^\d{8}$/.test(taxId)){document.getElementById('f-taxid').style.borderColor='var(--red)';alert('請輸入正確的 8 碼統編');return;}
     if(!brandZh){alert('請填寫品牌名稱（中文）');return;}
@@ -610,10 +605,10 @@ async function next(){
     if(!email){alert('請填寫客服信箱');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
-      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_phone:storePhone||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
+      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
       formTaxId=taxId;formBrandZh=brandZh;formBrandEn=brandEn;formEmail=email;formPhone=phone;
-      formContact=contact;formStorePhone=storePhone;formAddress=address;
+      formContact=contact;formAddress=address;
       cur++;renderStep();
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
@@ -660,7 +655,7 @@ function prev(){if(cur>1){cur--;renderStep();}}
 function resetForm(){
   cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
-  formContact='';formStorePhone='';formAddress='';
+  formContact='';formAddress='';
   document.getElementById('fw').style.display='block';document.getElementById('success').style.display='none';
   showLanding();
 }
