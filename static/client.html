@@ -50,7 +50,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .dots{display:flex;justify-content:space-between;margin-top:16px;}
 .dot-w{display:flex;flex-direction:column;align-items:center;gap:6px;cursor:default;}
 .dot-w.done{cursor:pointer;}
-.dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg3);color:var(--text3);border:1.5px solid var(--border2);transition:all .3s;}
+.dot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;background:var(--bg3);color:var(--text3);border:none;transition:all .3s;}
 .dot.done{background:var(--green);color:#fff;border-color:var(--green);}
 .dot.active{background:var(--gold);color:#fff;border-color:var(--gold);box-shadow:0 0 0 4px rgba(221,175,40,.18);}
 .dot-lb{font-size:10px;color:var(--text3);font-weight:500;white-space:nowrap;}
@@ -60,7 +60,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .sc{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:22px;margin-bottom:22px;min-height:300px;}
 .sh{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--border);}
 .si{font-size:26px;color:var(--text2);}.st{font-size:17px;font-weight:700;color:var(--text);}.sd{font-size:13px;color:var(--text2);margin-top:2px;}
-.req-tag{font-size:10px;background:var(--red-l);color:var(--red);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:text-top;line-height:1;margin-left:4px;border:1px solid rgba(224,85,85,.2);}
+.req-tag{color:var(--red);font-weight:700;margin-left:2px;}
 .opt-tag{font-size:10px;background:var(--gold-l);color:var(--gold-d);padding:2px 7px;border-radius:99px;font-weight:700;vertical-align:text-top;line-height:1;margin-left:4px;border:1px solid var(--gold-m);}
 
 /* Form */
@@ -407,18 +407,18 @@ function getBody(step){
   if(step===1) return `
     <div class="fg" style="margin-bottom:20px;">
       <div class="fg2">
-        <div class="field"><label>統一編號 <span class="req-tag">必填</span></label><input id="f-taxid" maxlength="8" placeholder="8 碼數字統編" value="${formTaxId}" oninput="this.style.borderColor=''"></div>
-        <div class="field"><label>客服信箱 <span class="req-tag">必填</span></label><input id="f-email" type="email" placeholder="例：service@example.com" value="${formEmail}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>統一編號 <span class="req-tag">*</span></label><input id="f-taxid" maxlength="8" placeholder="8 碼數字統編" value="${formTaxId}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>客服信箱 <span class="req-tag">*</span></label><input id="f-email" type="email" placeholder="例：service@example.com" value="${formEmail}" oninput="this.style.borderColor=''"></div>
       </div>
       <div class="fg2">
-        <div class="field"><label>品牌名稱（中文）<span class="req-tag">必填</span></label><input id="f-brand-zh" placeholder="例：揪預約好空間" value="${formBrandZh}" oninput="this.style.borderColor=''"></div>
-        <div class="field"><label>品牌名稱（英文）<span class="req-tag">必填</span></label><input id="f-brand-en" placeholder="例：JustBooking" value="${formBrandEn}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>品牌名稱（中文）<span class="req-tag">*</span></label><input id="f-brand-zh" placeholder="例：揪預約好空間" value="${formBrandZh}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>品牌名稱（英文）<span class="req-tag">*</span></label><input id="f-brand-en" placeholder="例：JustBooking" value="${formBrandEn}" oninput="this.style.borderColor=''"></div>
       </div>
       <div class="fg2">
-        <div class="field"><label>聯絡人 <span class="req-tag">必填</span></label><input id="f-contact" placeholder="例：王小明" value="${formContact}" oninput="this.style.borderColor=''"></div>
-        <div class="field"><label>聯絡電話 <span class="req-tag">必填</span></label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
+        <div class="field"><label>聯絡人 <span class="req-tag">*</span></label><input id="f-contact" placeholder="例：王小明" value="${formContact}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>聯絡電話 <span class="req-tag">*</span></label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
       </div>
-      <div class="field"><label>營業地址 <span class="req-tag">必填</span></label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}" oninput="this.style.borderColor=''"></div>
+      <div class="field"><label>營業地址 <span class="req-tag">*</span></label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}" oninput="this.style.borderColor=''"></div>
     </div>
     <div style="border-top:1px solid var(--border);padding-top:18px;">
       <div class="section-title">${ICO.cc} 選擇申請的金流項目</div>
@@ -457,7 +457,7 @@ function getBody(step){
           <div>
             <div class="doc-name"><span style="color:var(--text2)">${d.icon}</span> ${d.name}${d.optional
               ?`<span class="opt-tag">選填</span>`
-              :`<span class="req-tag">必填</span>`}</div>
+              :`<span class="req-tag">*</span>`}</div>
             <div class="doc-sub">${d.sub}</div>
           </div>
         </div>
