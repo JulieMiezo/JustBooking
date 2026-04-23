@@ -460,7 +460,7 @@ function getBody(step){
             <div class="doc-sub">${d.sub}</div>
           </div>
         </div>
-        <div class="doc-action">${uploadedDocs.has(d.id)?'已上傳 ✅':'點擊上傳 📎'}</div>
+        <div class="doc-action" style="display:flex;align-items:center;gap:6px">${uploadedDocs.has(d.id)?'<span>已上傳</span><span>✅</span>':'<span>點擊上傳</span><span>📎</span>'}</div>
       </div>`).join('')}
     <div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
       <span style="font-size:13px;color:var(--text2)">必要文件已上傳 </span>
@@ -472,19 +472,11 @@ function getBody(step){
     const c=calcPrice();
     const INV_TYPES=[
       {id:'miezo',name:'鯨躍電子發票',sub:'Miezo 協助申請，幫您處理所有申請流程'},
-      {id:'neweb',name:'藍新發票',    sub:'需自行向藍新申請'},
-      {id:'ecpay',name:'綠界發票',   sub:'需自行向綠界申請'},
+      {id:'neweb',name:'藍新發票',    sub:'需自行向藍新申請',eng:'ezPay',link:'https://inv.ezpay.com.tw'},
+      {id:'ecpay',name:'綠界發票',   sub:'需自行向綠界申請',eng:'ECPay',link:'https://www.ecpay.com.tw/Business/invoice_fee'},
       {id:'none', name:'不開立電子發票',sub:''},
     ];
-    let html=`<div style="display:grid;gap:10px;">
-      ${INV_TYPES.map(o=>`
-        <div class="addon-item ${invoiceType===o.id?'on':''}" onclick="setInvoiceType('${o.id}')">
-          <input type="radio" ${invoiceType===o.id?'checked':''} onclick="event.stopPropagation();setInvoiceType('${o.id}')" style="accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;margin-top:2px">
-          <div><div class="addon-name">${o.name}</div>${o.sub?`<div class="addon-desc">${o.sub}</div>`:''}</div>
-        </div>`).join('')}
-    </div>`;
-    if(invoiceType==='miezo') html+=`
-    <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px;display:grid;gap:16px;">
+    const miezoExpand=`<div style="margin:10px 0 0;padding:16px;background:var(--bg2);border-radius:10px;display:grid;gap:16px;">
       <div style="background:var(--gold-l);border:1.5px solid var(--gold-m);border-radius:12px;padding:16px 18px;">
         <div style="font-size:13px;font-weight:800;color:var(--gold-d);margin-bottom:10px">${ICO.star} 特殊優惠方案（含中獎發票列印服務）</div>
         <table class="sp-table">
@@ -524,7 +516,16 @@ function getBody(step){
         </div>
       </div>
     </div>`;
-    return html;}
+    let items='';
+    for(const o of INV_TYPES){
+      items+=`<div class="addon-item ${invoiceType===o.id?'on':''}" onclick="setInvoiceType('${o.id}')">
+        <input type="radio" ${invoiceType===o.id?'checked':''} onclick="event.stopPropagation();setInvoiceType('${o.id}')" style="accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;margin-top:2px">
+        <div><div class="addon-name" style="font-weight:500">${o.name}${o.eng?` <a href="${o.link}" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue);font-weight:400;text-decoration:none;margin-left:4px">${o.eng} ↗</a>`:''}</div>${o.sub?`<div class="addon-desc">${o.sub}</div>`:''}</div>
+      </div>`;
+      if(o.id==='miezo'&&invoiceType==='miezo') items+=miezoExpand;
+    }
+    return `<div style="display:grid;gap:10px;">${items}</div>`;}
+
 
   if(step===4) return `
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px">系統設定費 <strong style="color:var(--gold-d)">$${calcPrice().setup.toLocaleString()}</strong> 已含於方案，以下為選購加值服務：</p>
