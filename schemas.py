@@ -31,10 +31,11 @@ class Step1PaymentSchema(BaseModel):
 
 # ── Step 3: 發票方案 ─────────────────────────────────────────────
 class Step3InvoiceSchema(BaseModel):
-    invoice_plan:    InvoicePlan
-    contract_years:  int = Field(..., ge=1, le=3)
-    invoice_year_fee: int
-    setup_fee:       int
+    invoice_type:    str = 'miezo'
+    invoice_plan:    Optional[InvoicePlan] = None
+    contract_years:  Optional[int] = Field(None, ge=1, le=3)
+    invoice_year_fee: Optional[int] = None
+    setup_fee:       Optional[int] = None
 
 
 # ── Step 4: 加值服務 ─────────────────────────────────────────────

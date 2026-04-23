@@ -9,6 +9,7 @@ NEW_COLUMNS = [
     ("contact_person", "VARCHAR(50) NULL COMMENT '聯絡人'"),
     ("store_phone",    "VARCHAR(20) NULL COMMENT '商店電話'"),
     ("store_address",  "VARCHAR(200) NULL COMMENT '營業地址'"),
+    ("invoice_type",   "VARCHAR(20) NULL COMMENT '發票類型 miezo/neweb/ecpay/none'"),
 ]
 
 def run():

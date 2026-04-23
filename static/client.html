@@ -371,7 +371,7 @@ const DOCS=[
 ];
 const ST={in_progress:{l:'進行中'},reviewing:{l:'審核中'},approved:{l:'已完成'},rejected:{l:'需修正'}};
 
-let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set();
+let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set(),invoiceType='';
 let formTaxId='',formBrandZh='',formBrandEn='',formEmail='',formPhone='';
 let formContact='',formAddress='';
 
@@ -470,9 +470,23 @@ function getBody(step){
 
   if(step===3){
     const c=calcPrice();
-    return `<div style="display:grid;gap:16px;">
+    const INV_TYPES=[
+      {id:'miezo',name:'鯨躍電子發票',sub:'Miezo 協助申請，幫您處理所有申請流程'},
+      {id:'neweb',name:'藍新發票',    sub:'需自行向藍新申請'},
+      {id:'ecpay',name:'綠界發票',   sub:'需自行向綠界申請'},
+      {id:'none', name:'不開立電子發票',sub:''},
+    ];
+    let html=`<div style="display:grid;gap:10px;">
+      ${INV_TYPES.map(o=>`
+        <div class="addon-item ${invoiceType===o.id?'on':''}" onclick="setInvoiceType('${o.id}')">
+          <input type="radio" ${invoiceType===o.id?'checked':''} onclick="event.stopPropagation();setInvoiceType('${o.id}')" style="accent-color:var(--blue);width:16px;height:16px;flex-shrink:0;margin-top:2px">
+          <div><div class="addon-name">${o.name}</div>${o.sub?`<div class="addon-desc">${o.sub}</div>`:''}</div>
+        </div>`).join('')}
+    </div>`;
+    if(invoiceType==='miezo') html+=`
+    <div style="border-top:1px solid var(--border);margin-top:20px;padding-top:20px;display:grid;gap:16px;">
       <div style="background:var(--gold-l);border:1.5px solid var(--gold-m);border-radius:12px;padding:16px 18px;">
-        <div style="font-size:13px;font-weight:800;color:var(--gold-d);margin-bottom:10px">🌟 特殊優惠方案（含中獎發票列印服務）</div>
+        <div style="font-size:13px;font-weight:800;color:var(--gold-d);margin-bottom:10px">${ICO.star} 特殊優惠方案（含中獎發票列印服務）</div>
         <table class="sp-table">
           <thead><tr><th>張/月</th><th>合約</th><th>設定費</th><th>說明</th><th style="text-align:right">總計</th></tr></thead>
           <tbody>
@@ -509,7 +523,8 @@ function getBody(step){
           ${c.special?`<span class="pr-tag pr-tag-red">特惠方案</span>`:''}
         </div>
       </div>
-    </div>`;}
+    </div>`;
+    return html;}
 
   if(step===4) return `
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px">系統設定費 <strong style="color:var(--gold-d)">$${calcPrice().setup.toLocaleString()}</strong> 已含於方案，以下為選購加值服務：</p>
@@ -523,12 +538,16 @@ function getBody(step){
   if(step===5){
     const c=calcPrice();
     const payLabels=[...selectedPayments].map(id=>PAYMENT_OPTIONS.find(p=>p.id===id)?.name||id).join('、')||'（未選擇）';
+    const invTypeName={miezo:'鯨躍電子發票',neweb:'藍新發票',ecpay:'綠界發票',none:'不開立電子發票'}[invoiceType]||invoiceType;
+    const isMiezo=invoiceType==='miezo';
     return `
     <p style="font-size:14px;color:var(--text2);margin-bottom:14px">請確認以下申請內容後送出：</p>
     <div class="summary-box">
       <div class="sum-row"><span class="sum-lbl">金流申請</span><span class="sum-val">✅ 已填寫</span></div>
       <div class="sum-row"><span class="sum-lbl">申請金流項目</span><span class="sum-val" style="font-size:13px;text-align:right;max-width:60%">${payLabels}</span></div>
       <div class="sum-row"><span class="sum-lbl">上傳文件</span><span class="sum-val">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length>=5?'✅ 必要文件齊全':'⚠️ 必要文件未齊全'}</span></div>
+      <div class="sum-row"><span class="sum-lbl">發票類型</span><span class="sum-val">${invTypeName}</span></div>
+      ${isMiezo?`
       <div class="sum-row"><span class="sum-lbl">發票方案</span><span class="sum-val" style="color:var(--gold-d)">方案 ${c.p.plan} · ${c.p.vol.toLocaleString()} 張/月</span></div>
       <div class="sum-row"><span class="sum-lbl">合約年限</span><span class="sum-val">${c.y.y} 年</span></div>
       <div class="sum-row"><span class="sum-lbl">年費 × 年數</span><span class="sum-val">$${c.p.year.toLocaleString()} × ${c.y.y} = $${(c.p.year*c.y.y).toLocaleString()}</span></div>
@@ -537,14 +556,16 @@ function getBody(step){
       ${addons.has('print')?`<div class="sum-row"><span class="sum-lbl">列印中獎發票</span><span class="sum-val">$3,000 起</span></div>`:''}
       ${addons.has('pdf')?`<div class="sum-row"><span class="sum-lbl">統編 PDF 寄送</span><span class="sum-val">$3,600 / 年</span></div>`:''}
       ${addons.has('channel')?`<div class="sum-row"><span class="sum-lbl">多通路整合</span><span class="sum-val">$3,000 / 通路</span></div>`:''}
+      `:''}
     </div>
-    <div class="summary-box"><div class="sum-total"><span class="sum-lbl">合計（稅前預估）</span><span class="sum-val">$${c.total.toLocaleString()}</span></div></div>
-    <div class="notice notice-red">⚠️ 此為發票預估報價，款項實際需以鯨躍合約為主。</div>
+    ${isMiezo?`<div class="summary-box"><div class="sum-total"><span class="sum-lbl">合計（稅前預估）</span><span class="sum-val">$${c.total.toLocaleString()}</span></div></div>
+    <div class="notice notice-red">⚠️ 此為發票預估報價，款項實際需以鯨躍合約為主。</div>`:''}
     <div class="notice notice-blue">📧 送出後，確認信將寄送至您在金流申請中填寫的客服信箱，請留意收件匣。</div>`;}
   return '';
 }
 
 function setSlider(v){sliderIdx=parseInt(v);renderStep();}
+function setInvoiceType(t){invoiceType=t;renderStep();}
 function setYear(i){yearIdx=i;renderStep();}
 function toggleDoc(id){
   if(!formTaxId){alert('請先完成步驟 1 填寫基本資料');return;}
@@ -634,12 +655,16 @@ async function next(){
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===3){
+    if(!invoiceType){alert('請選擇發票類型');return;}
     const c=calcPrice();
     bn.disabled=true;bn.textContent='送出中...';
     try{
-      const res=await fetch(`/api/clients/step3/${formTaxId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice_plan:c.p.plan,contract_years:c.y.y,invoice_year_fee:c.p.year,setup_fee:c.setup})});
+      const body=invoiceType==='miezo'
+        ?{invoice_type:'miezo',invoice_plan:c.p.plan,contract_years:c.y.y,invoice_year_fee:c.p.year,setup_fee:c.setup}
+        :{invoice_type:invoiceType};
+      const res=await fetch(`/api/clients/step3/${formTaxId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
-      cur++;renderStep();
+      cur=invoiceType==='miezo'?cur+1:5;renderStep();
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===4){
@@ -662,9 +687,9 @@ async function next(){
     finally{bn.disabled=false;}
   }
 }
-function prev(){if(cur>1){cur--;renderStep();}}
+function prev(){if(cur>1){if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
 function resetForm(){
-  cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();
+  cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
   formContact='';formAddress='';
   document.getElementById('fw').style.display='block';document.getElementById('success').style.display='none';

@@ -94,13 +94,17 @@ def complete_step2(tax_id: str, db: Session = Depends(get_db)):
 def submit_step3(tax_id: str, payload: Step3InvoiceSchema, db: Session = Depends(get_db)):
     """儲存發票方案選擇"""
     app = get_or_404(db, tax_id)
-    app.invoice_plan     = payload.invoice_plan
-    app.contract_years   = payload.contract_years
-    app.invoice_year_fee = payload.invoice_year_fee
-    app.setup_fee        = payload.setup_fee
-    app.current_step     = max(app.current_step, 4)
+    app.invoice_type = payload.invoice_type
+    if payload.invoice_type == 'miezo' and payload.invoice_plan:
+        app.invoice_plan     = payload.invoice_plan
+        app.contract_years   = payload.contract_years
+        app.invoice_year_fee = payload.invoice_year_fee or 0
+        app.setup_fee        = payload.setup_fee if payload.setup_fee is not None else 3000
+        app.current_step     = max(app.current_step, 4)
+    else:
+        app.current_step     = max(app.current_step, 5)
     db.commit()
-    return MessageResponse(message="發票方案已儲存")
+    return MessageResponse(message="發票資訊已儲存")
 
 
 # ── Step 4: 加值服務 ────────────────────────────────────────────

@@ -61,6 +61,7 @@ class ClientApplication(Base):
     payment_form_submitted = Column(Boolean, default=False, comment="藍新表單是否已填")
 
     # 發票方案
+    invoice_type    = Column(String(20), nullable=True, comment="發票類型 miezo/neweb/ecpay/none")
     invoice_plan    = Column(Enum(InvoicePlan), nullable=True, comment="發票方案 A-G")
     contract_years  = Column(Integer, default=1, comment="合約年限 1/2/3")
     invoice_year_fee = Column(Integer, default=0, comment="年費")
