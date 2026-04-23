@@ -155,7 +155,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .sum-row{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);font-size:14px;}
 .sum-row:last-child{border-bottom:none;}
 .sum-lbl{color:var(--text2);}
-.sum-val{font-weight:700;color:var(--text);}
+.sum-val{font-weight:400;color:var(--text);}
 .sum-total{background:var(--gold);padding:16px 18px;display:flex;justify-content:space-between;align-items:center;}
 .sum-total .sum-lbl{color:rgba(255,255,255,.85);font-weight:600;font-size:14px;}
 .sum-total .sum-val{color:#fff;font-size:20px;font-weight:900;}
@@ -357,6 +357,7 @@ const PAYMENT_OPTIONS=[
   {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流  <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
+  {id:'none', name:'不串接金流', label:'不串接金流', icon:'', note:'選擇後將不申請任何金流服務', depends:null, conflicts:null},
 ];
 const ADDONS=[
   {id:'print',name:'列印中獎發票（全家便利商店）',desc:'每一統編開通設定費 $1,000 + 發票儲值金 $2,000（$20/張，每單位100張）・不續約時，退還剩餘儲值金',price:'$3,000 起'},
@@ -607,6 +608,8 @@ function togglePay(id){
     const a=opt.name,b=PAYMENT_OPTIONS.find(p=>p.id===opt.conflicts)?.name;
     alert(`「${a}」與「${b}」不可同時申請，請擇一選擇。`);return;
   }
+  if(id==='none'&&!selectedPayments.has('none')){selectedPayments.clear();}
+  else if(id!=='none'){selectedPayments.delete('none');}
   if(selectedPayments.has(id)){selectedPayments.delete(id);if(id==='cc')selectedPayments.delete('apple');}
   else selectedPayments.add(id);
   renderStep();
@@ -638,6 +641,7 @@ async function next(){
     if(!phone){err('f-phone','請填寫聯絡電話');return;}
     {const d=phone.replace(/-/g,'');if(!/^0[0-9]{8,9}$/.test(d)){err('f-phone','請輸入正確的電話格式，例如：02-12345678 或 0912-345678');return;}}
     if(!address){err('f-address','請填寫營業地址');return;}
+    if(selectedPayments.size===0){alert('請至少選擇一項金流服務');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
       const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
