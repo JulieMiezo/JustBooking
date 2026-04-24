@@ -738,7 +738,7 @@ async function next(){
       if(selectedPayments.has('none')){
         invoiceType='none';
         await fetch(`/api/clients/step3/${formTaxId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice_type:'none'})});
-        cur=4;
+        cur=5;
       }else{cur++;}
       renderStep();
     }catch{alert('連線失敗，請稍後再試');}
@@ -785,7 +785,7 @@ async function next(){
     finally{bn.disabled=false;}
   }
 }
-function prev(){if(cur>1){if(cur===4&&selectedPayments.has('none'))cur=2;else if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
+function prev(){if(cur>1){if(cur===5&&selectedPayments.has('none'))cur=2;else if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
 function resetForm(){
   cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';applicantType='';notifyEmail=false;notifyLine=false;notifySms=false;smsPlan='';
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
