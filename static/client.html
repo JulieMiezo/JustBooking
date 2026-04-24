@@ -573,15 +573,15 @@ function getBody(step){
     <div style="display:grid;gap:10px;">
       <div class="addon-item ${notifyEmail?'on':''}" onclick="toggleNotify('email')">
         <input type="checkbox" ${notifyEmail?'checked':''} onclick="event.stopPropagation();toggleNotify('email')">
-        <div><div class="addon-name">Email 通知</div><div class="addon-desc">系統將自動寄送預約確認、提醒信件給使用者</div></div>
+        <div><div class="addon-name">Email 通知</div><div class="addon-desc">寄送預約通知、取消通知給使用者</div></div>
       </div>
       <div class="addon-item ${notifyLine?'on':''}" onclick="toggleNotify('line')">
         <input type="checkbox" ${notifyLine?'checked':''} onclick="event.stopPropagation();toggleNotify('line')">
-        <div><div class="addon-name">LINE 通知</div><div class="addon-desc">透過 LINE 官方帳號發送預約確認、提醒訊息給使用者</div></div>
+        <div><div class="addon-name">LINE 通知</div><div class="addon-desc">透過 LINE 官方帳號發送預約通知、取消通知給使用者</div></div>
       </div>
       <div class="addon-item ${notifySms?'on':''}" onclick="toggleNotify('sms')">
         <input type="checkbox" ${notifySms?'checked':''} onclick="event.stopPropagation();toggleNotify('sms')">
-        <div><div class="addon-name">簡訊通知</div><div class="addon-desc">系統將自動發送預約確認、提醒簡訊給使用者</div></div>
+        <div><div class="addon-name">簡訊通知</div><div class="addon-desc">發送預約通知、取消通知簡訊給使用者</div></div>
       </div>
       ${notifySms?`<div style="margin-left:29px;display:grid;gap:8px;">
         ${SMS_PLANS.map(p=>`<div class="addon-item ${smsPlan===p.id?'on':''}" onclick="setSmsPlan('${p.id}')" style="padding:10px 14px;">
