@@ -382,6 +382,7 @@ const DOCS=[
 const ST={in_progress:{l:'進行中'},reviewing:{l:'審核中'},approved:{l:'已完成'},rejected:{l:'需修正'}};
 
 let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set(),invoiceType='',applicantType='',notifyEmail=false,notifyLine=false,notifySms=false,smsPlan='';
+let docFiles=new Map();
 let formTaxId='',formBrandZh='',formBrandEn='',formEmail='',formPhone='';
 let formContact='',formAddress='';
 
@@ -491,7 +492,7 @@ function getBody(step){
             <div class="doc-sub">${d.sub}</div>
           </div>
         </div>
-        <div class="doc-action" style="display:flex;align-items:center;gap:6px">${uploadedDocs.has(d.id)?'<span>已上傳</span><span>✅</span>':'<span>點擊上傳</span><span>📎</span>'}</div>
+        <div class="doc-action" style="display:flex;align-items:center;gap:6px">${(()=>{if(!uploadedDocs.has(d.id))return'<span>點擊上傳</span><span>📎</span>';const f=docFiles.get(d.id);if(f?.url)return`<img src="${f.url}" style="height:36px;width:36px;object-fit:cover;border-radius:4px"> <span>✅</span>`;if(f?.name)return`<span style="font-size:11px;color:var(--text2);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</span> <span>✅</span>`;return'<span>已上傳</span><span>✅</span>';})()}</div>
       </div>`).join('')}
     <div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
       <span style="font-size:13px;color:var(--text2)">必要文件已上傳 </span>
@@ -573,12 +574,10 @@ function getBody(step){
       <div class="addon-item ${notifyEmail?'on':''}" onclick="toggleNotify('email')">
         <input type="checkbox" ${notifyEmail?'checked':''} onclick="event.stopPropagation();toggleNotify('email')">
         <div><div class="addon-name">Email 通知</div><div class="addon-desc">系統將自動寄送預約確認、提醒信件給使用者</div></div>
-        <div class="addon-price">免費</div>
       </div>
       <div class="addon-item ${notifyLine?'on':''}" onclick="toggleNotify('line')">
         <input type="checkbox" ${notifyLine?'checked':''} onclick="event.stopPropagation();toggleNotify('line')">
         <div><div class="addon-name">LINE 通知</div><div class="addon-desc">透過 LINE 官方帳號發送預約確認、提醒訊息給使用者</div></div>
-        <div class="addon-price">免費</div>
       </div>
       <div class="addon-item ${notifySms?'on':''}" onclick="toggleNotify('sms')">
         <input type="checkbox" ${notifySms?'checked':''} onclick="event.stopPropagation();toggleNotify('sms')">
@@ -628,7 +627,8 @@ function setYear(i){yearIdx=i;renderStep();}
 function toggleDoc(id){
   if(!formTaxId){alert('請先完成步驟 1 填寫基本資料');return;}
   const inp=document.createElement('input');
-  inp.type='file';inp.accept='.jpg,.jpeg,.png,.webp,.gif,.pdf';
+  inp.type='file';
+  inp.accept=id==='logo'?'image/*':'.jpg,.jpeg,.png,.webp,.gif,.pdf';
   inp.onchange=async(e)=>{
     const file=e.target.files[0];if(!file)return;
     const fd=new FormData();fd.append('file',file);
@@ -637,7 +637,12 @@ function toggleDoc(id){
     try{
       const doc=DOCS.find(d=>d.id===id);
       const res=await fetch(`/api/upload/${formTaxId}/${doc?.docType||id}`,{method:'POST',body:fd});
-      if(res.ok){uploadedDocs.add(id);renderStep();}
+      if(res.ok){
+        uploadedDocs.add(id);
+        const prev=docFiles.get(id);if(prev?.url)URL.revokeObjectURL(prev.url);
+        docFiles.set(id,{name:file.name,url:file.type.startsWith('image/')?URL.createObjectURL(file):null});
+        renderStep();
+      }
       else{const d=await res.json();alert(d.detail||'上傳失敗');}
     }catch{alert('上傳失敗，請稍後再試');}
     finally{items.forEach(el=>el.style.opacity='');}
@@ -765,6 +770,7 @@ async function next(){
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===5){
+    if(!notifyEmail&&!notifyLine&&!notifySms){alert('請至少選擇一種通知方式');return;}
     if(notifySms&&!smsPlan){alert('請選擇簡訊方案');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
@@ -788,6 +794,7 @@ async function next(){
 function prev(){if(cur>1){if(cur===5&&selectedPayments.has('none'))cur=2;else if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
 function resetForm(){
   cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';applicantType='';notifyEmail=false;notifyLine=false;notifySms=false;smsPlan='';
+  docFiles.forEach(f=>{if(f?.url)URL.revokeObjectURL(f.url);});docFiles=new Map();
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
   formContact='';formAddress='';
   document.getElementById('fw').style.display='block';document.getElementById('success').style.display='none';
