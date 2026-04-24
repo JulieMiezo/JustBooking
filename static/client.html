@@ -364,7 +364,7 @@ const PAYMENT_OPTIONS=[
   {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流  <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
-  {id:'none', name:'不串接線上金流', label:'不串接金流', icon:'', note:'使用者預約僅限優惠代碼預約', depends:null, conflicts:null},
+  {id:'none', name:'不串接線上金流', label:'不串接金流', icon:'', note:'僅限使用〖 優惠代碼 〗預約', depends:null, conflicts:null},
 ];
 const ADDONS=[
   {id:'print',name:'列印中獎發票（全家便利商店）',desc:'每一統編開通設定費 $1,000 + 發票儲值金 $2,000（$20/張，每單位100張）・不續約時，退還剩餘儲值金',price:'$3,000 起'},
@@ -735,7 +735,12 @@ async function next(){
     try{
       const res=await fetch(`/api/clients/step2/${formTaxId}`,{method:'POST'});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
-      cur++;renderStep();
+      if(selectedPayments.has('none')){
+        invoiceType='none';
+        await fetch(`/api/clients/step3/${formTaxId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({invoice_type:'none'})});
+        cur=4;
+      }else{cur++;}
+      renderStep();
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===3){
@@ -780,7 +785,7 @@ async function next(){
     finally{bn.disabled=false;}
   }
 }
-function prev(){if(cur>1){if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
+function prev(){if(cur>1){if(cur===4&&selectedPayments.has('none'))cur=2;else if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
 function resetForm(){
   cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';applicantType='';notifyEmail=false;notifyLine=false;notifySms=false;smsPlan='';
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
