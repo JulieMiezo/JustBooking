@@ -656,6 +656,17 @@ function saveStep1Fields(){
   const c=document.getElementById('f-contact');    if(c)formContact=c.value;
   const a=document.getElementById('f-address');    if(a)formAddress=a.value;
 }
+function isValidTwId(id){
+  const map={A:10,B:11,C:12,D:13,E:14,F:15,G:16,H:17,I:34,J:18,K:19,L:20,M:21,N:22,O:35,P:23,Q:24,R:25,S:26,T:27,U:28,V:29,W:32,X:30,Y:31,Z:33};
+  id=id.toUpperCase();
+  if(!/^[A-Z][12][0-9]{8}$/.test(id))return false;
+  const n=map[id[0]];
+  if(!n)return false;
+  let s=Math.floor(n/10)+(n%10)*9;
+  for(let i=1;i<=8;i++)s+=parseInt(id[i])*(9-i);
+  s+=parseInt(id[9]);
+  return s%10===0;
+}
 function setApplicantType(t){
   if(cur===1)saveStep1Fields();
   applicantType=t;
@@ -696,7 +707,7 @@ async function next(){
     const err=(id,msg)=>{document.getElementById(id).style.borderColor='var(--red)';alert(msg);};
     if(!applicantType){alert('請先選擇申請類型（公司 / 個人）');return;}
     if(applicantType==='company'){if(!taxId||!/^\d{8}$/.test(taxId)){err('f-taxid','請輸入正確的 8 碼統編');return;}}
-    else{if(!taxId||!/^[A-Z][0-9]{9}$/.test(taxId)){err('f-taxid','請輸入正確的身分證字號格式，例：A123456789');return;}}
+    else{if(!taxId||!isValidTwId(taxId)){err('f-taxid','請輸入正確的身分證字號');return;}}
     if(!email){err('f-email','請填寫客服信箱');return;}
     if(!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)){err('f-email','請輸入正確的信箱格式');return;}
     if(!brandZh){err('f-brand-zh','請填寫品牌名稱（中文）');return;}
