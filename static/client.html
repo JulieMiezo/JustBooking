@@ -343,7 +343,13 @@ const STEPS=[
   {id:2,icon:ICO.image, title:'上傳影像文件',desc:'營業登記、身分證、存摺、Logo、場域圖'},
   {id:3,icon:ICO.file,  title:'發票方案',  desc:'選擇方案與合約年限，自動計算優惠'},
   {id:4,icon:ICO.plus,  title:'加值服務',  desc:'中獎發票列印、統編寄送等加購選項'},
-  {id:5,icon:ICO.check, title:'確認送出',  desc:'核對所有資料後完成申請'},
+  {id:5,icon:ICO.cal,   title:'通知方式',  desc:'選擇預約系統通知使用者的方式'},
+  {id:6,icon:ICO.check, title:'確認送出',  desc:'核對所有資料後完成申請'},
+];
+const SMS_PLANS=[
+  {id:'12000',price:'NT$12,000 / 年',msgs:'12,500 則 / 年'},
+  {id:'6000', price:'NT$6,000 / 年', msgs:'5,000 則 / 年'},
+  {id:'3000', price:'NT$3,000 / 年', msgs:'2,000 則 / 年'},
 ];
 const INV=[
   {plan:'A',vol:500,year:6600},{plan:'B',vol:1000,year:9900},{plan:'C',vol:3000,year:13200},
@@ -357,7 +363,7 @@ const PAYMENT_OPTIONS=[
   {id:'green',name:'綠界金流',   label:'信用卡 - 綠界金流  <img src="/static/ecpay.png" style="height:24px;width:auto;vertical-align:middle"> <span style="font-size:11px;color:var(--text3);font-weight:400">（需自行申請）</span>', icon:'', note:'不可與信用卡 - 藍新金流同時申請', depends:null, conflicts:'cc'},
   {id:'line', name:'LINE Pay',   label:'<img src="/static/LINE_Pay.png" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
   {id:'ipass',name:'iPASS/TWQR', label:'<img src="/static/TWQR.svg" style="height:18px;width:auto;vertical-align:middle">', icon:'', note:'', depends:null, conflicts:null},
-  {id:'none', name:'不串接金流', label:'不串接金流', icon:'', note:'選擇後將不申請任何金流服務', depends:null, conflicts:null},
+  {id:'none', name:'不串接線上金流', label:'不串接金流', icon:'', note:'使用者預約僅限優惠代碼預約', depends:null, conflicts:null},
 ];
 const ADDONS=[
   {id:'print',name:'列印中獎發票（全家便利商店）',desc:'每一統編開通設定費 $1,000 + 發票儲值金 $2,000（$20/張，每單位100張）・不續約時，退還剩餘儲值金',price:'$3,000 起'},
@@ -374,7 +380,7 @@ const DOCS=[
 ];
 const ST={in_progress:{l:'進行中'},reviewing:{l:'審核中'},approved:{l:'已完成'},rejected:{l:'需修正'}};
 
-let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set(),invoiceType='';
+let cur=1,sliderIdx=0,yearIdx=0,addons=new Set(),uploadedDocs=new Set(),selectedPayments=new Set(),invoiceType='',applicantType='',notifyEmail=false,notifyLine=false,notifySms=false,smsPlan='';
 let formTaxId='',formBrandZh='',formBrandEn='',formEmail='',formPhone='';
 let formContact='',formAddress='';
 
@@ -409,9 +415,23 @@ function renderStep(){
 
 function getBody(step){
   if(step===1) return `
+    <div style="margin-bottom:20px;">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">申請類型 <span class="req-tag">*</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="addon-item ${applicantType==='company'?'on':''}" onclick="setApplicantType('company')" style="cursor:pointer;justify-content:flex-start;gap:10px;">
+          <div style="font-size:22px">🏢</div>
+          <div><div style="font-weight:600;font-size:14px">公司 / 行號</div><div style="font-size:12px;color:var(--text2);margin-top:2px">使用統一編號（8 碼）</div></div>
+        </div>
+        <div class="addon-item ${applicantType==='person'?'on':''}" onclick="setApplicantType('person')" style="cursor:pointer;justify-content:flex-start;gap:10px;">
+          <div style="font-size:22px">👤</div>
+          <div><div style="font-weight:600;font-size:14px">個人</div><div style="font-size:12px;color:var(--text2);margin-top:2px">使用身分證字號（10 碼）</div></div>
+        </div>
+      </div>
+    </div>
+    ${applicantType?`
     <div class="fg" style="margin-bottom:20px;">
       <div class="fg2">
-        <div class="field"><label>統一編號 <span class="req-tag">*</span></label><input id="f-taxid" maxlength="8" placeholder="8 碼數字統編" value="${formTaxId}" oninput="this.style.borderColor=''"></div>
+        <div class="field"><label>${applicantType==='person'?'身分證字號':'統一編號'} <span class="req-tag">*</span></label><input id="f-taxid" maxlength="${applicantType==='person'?10:8}" placeholder="${applicantType==='person'?'例：A123456789':'8 碼數字統編'}" value="${formTaxId}" oninput="this.style.borderColor='';${applicantType==='person'?'this.value=this.value.toUpperCase();':''}"></div>
         <div class="field"><label>客服信箱 <span class="req-tag">*</span></label><input id="f-email" type="text" placeholder="例：service@example.com" value="${formEmail}" oninput="this.style.borderColor=''"></div>
       </div>
       <div class="fg2">
@@ -423,7 +443,8 @@ function getBody(step){
         <div class="field"><label>聯絡電話 <span class="req-tag">*</span></label><input id="f-phone" placeholder="例：02-12345678" value="${formPhone}" oninput="this.value=this.value.replace(/[^0-9-]/g,'')"></div>
       </div>
       <div class="field"><label>營業地址 <span class="req-tag">*</span></label><input id="f-address" placeholder="例：台北市信義區信義路五段7號" value="${formAddress}" oninput="this.style.borderColor=''"></div>
-    </div>
+    </div>`:''}
+    ${applicantType?`<div>`:'<div style="display:none">'}
     <div style="border-top:1px solid var(--border);padding-top:18px;">
       <div class="section-title">${ICO.cc} 選擇申請的金流項目</div>
       ${PAYMENT_OPTIONS.map(p=>{
@@ -450,11 +471,17 @@ function getBody(step){
           </div>
         </div>${payBox}`;
       }).join('')}
-    </div>`;
+    </div></div>`;
 
-  if(step===2) return `
-    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">請點擊各項目上傳對應文件（必要 4 項 + 選填 1 項）：</p>
-    ${DOCS.map((d,i)=>`
+  if(step===2){
+    const isNonePay=selectedPayments.has('none');
+    const visibleDocs=isNonePay?DOCS.filter(d=>d.id==='logo'||d.id==='scene'):DOCS;
+    const reqCount=visibleDocs.filter(d=>!d.optional).length;
+    const uploadedReq=[...uploadedDocs].filter(id=>visibleDocs.find(d=>d.id===id&&!d.optional)).length;
+    return `
+    ${isNonePay?`<div class="notice notice-blue" style="margin-bottom:14px">ℹ️ 選擇不串接金流，僅需上傳 Logo 圖檔（其餘文件免附）。</div>`:''}
+    <p style="font-size:13px;color:var(--text2);margin-bottom:14px">請點擊各項目上傳對應文件（必要 ${reqCount} 項${visibleDocs.some(d=>d.optional)?' + 選填 1 項':''}）：</p>
+    ${visibleDocs.map((d,i)=>`
       <div class="doc-item ${uploadedDocs.has(d.id)?'done':''}" onclick="toggleDoc('${d.id}')">
         <div class="doc-left">
           <div class="doc-num">${uploadedDocs.has(d.id)?'✓':(i+1)}</div>
@@ -467,9 +494,9 @@ function getBody(step){
       </div>`).join('')}
     <div style="padding:10px 14px;background:var(--bg2);border-radius:8px;border:1px solid var(--border);">
       <span style="font-size:13px;color:var(--text2)">必要文件已上傳 </span>
-      <span style="font-size:13px;font-weight:700;color:var(--blue)">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length} / 5</span>
-      ${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length===5?'<span style="font-size:13px;color:var(--green);font-weight:700;margin-left:8px">✓ 必要文件齊全！</span>':''}
-    </div>`;
+      <span style="font-size:13px;font-weight:700;color:var(--blue)">${uploadedReq} / ${reqCount}</span>
+      ${uploadedReq===reqCount?'<span style="font-size:13px;color:var(--green);font-weight:700;margin-left:8px">✓ 必要文件齊全！</span>':''}
+    </div>`;};
 
   if(step===3){
     const c=calcPrice();
@@ -539,7 +566,32 @@ function getBody(step){
         <div class="addon-price">${a.price}</div>
       </div>`).join('')}`;
 
-  if(step===5){
+  if(step===5) return `
+    <div class="notice notice-blue" style="margin-bottom:16px">📢 以下通知方式為預約系統寄送給您的使用者，請選擇您要開通的服務。</div>
+    <div style="display:grid;gap:10px;">
+      <div class="addon-item ${notifyEmail?'on':''}" onclick="toggleNotify('email')">
+        <input type="checkbox" ${notifyEmail?'checked':''} onclick="event.stopPropagation();toggleNotify('email')">
+        <div><div class="addon-name">Email 通知</div><div class="addon-desc">系統將自動寄送預約確認、提醒信件給使用者</div></div>
+        <div class="addon-price">免費</div>
+      </div>
+      <div class="addon-item ${notifyLine?'on':''}" onclick="toggleNotify('line')">
+        <input type="checkbox" ${notifyLine?'checked':''} onclick="event.stopPropagation();toggleNotify('line')">
+        <div><div class="addon-name">LINE 通知</div><div class="addon-desc">透過 LINE 官方帳號發送預約確認、提醒訊息給使用者</div></div>
+        <div class="addon-price">免費</div>
+      </div>
+      <div class="addon-item ${notifySms?'on':''}" onclick="toggleNotify('sms')">
+        <input type="checkbox" ${notifySms?'checked':''} onclick="event.stopPropagation();toggleNotify('sms')">
+        <div><div class="addon-name">簡訊通知</div><div class="addon-desc">系統將自動發送預約確認、提醒簡訊給使用者</div></div>
+      </div>
+      ${notifySms?`<div style="margin-left:29px;display:grid;gap:8px;">
+        ${SMS_PLANS.map(p=>`<div class="addon-item ${smsPlan===p.id?'on':''}" onclick="setSmsPlan('${p.id}')" style="padding:10px 14px;">
+          <input type="radio" ${smsPlan===p.id?'checked':''} onclick="event.stopPropagation();setSmsPlan('${p.id}')">
+          <div><div class="addon-name">${p.price}</div><div class="addon-desc">${p.msgs}</div></div>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`;
+
+  if(step===6){
     const c=calcPrice();
     const payLabels=[...selectedPayments].map(id=>PAYMENT_OPTIONS.find(p=>p.id===id)?.name||id).join('、')||'（未選擇）';
     const invTypeName={miezo:'鯨躍電子發票',neweb:'藍新發票',ecpay:'綠界發票',none:'不開立電子發票'}[invoiceType]||invoiceType;
@@ -549,7 +601,7 @@ function getBody(step){
     <div class="summary-box">
       <div class="sum-row"><span class="sum-lbl">金流申請</span><span class="sum-val">✅ 已填寫</span></div>
       <div class="sum-row"><span class="sum-lbl">申請金流項目</span><span class="sum-val" style="font-size:13px;text-align:right;max-width:60%">${payLabels}</span></div>
-      <div class="sum-row"><span class="sum-lbl">上傳文件</span><span class="sum-val">${[...uploadedDocs].filter(id=>!DOCS.find(d=>d.id===id)?.optional).length>=5?'✅ 必要文件齊全':'⚠️ 必要文件未齊全'}</span></div>
+      <div class="sum-row"><span class="sum-lbl">上傳文件</span><span class="sum-val">${(()=>{const isN=selectedPayments.has('none');const req=(isN?DOCS.filter(d=>d.id==='logo'||d.id==='scene'):DOCS).filter(d=>!d.optional);return req.every(d=>uploadedDocs.has(d.id))?'✅ 必要文件齊全':'⚠️ 必要文件未齊全';})()}</span></div>
       <div class="sum-row"><span class="sum-lbl">發票類型</span><span class="sum-val">${invTypeName}</span></div>
       ${isMiezo?`
       <div class="sum-row"><span class="sum-lbl">發票方案</span><span class="sum-val" style="color:var(--gold-d)">方案 ${c.p.plan} · ${c.p.vol.toLocaleString()} 張/月</span></div>
@@ -561,6 +613,7 @@ function getBody(step){
       ${addons.has('pdf')?`<div class="sum-row"><span class="sum-lbl">統編 PDF 寄送</span><span class="sum-val">$3,600 / 年</span></div>`:''}
       ${addons.has('channel')?`<div class="sum-row"><span class="sum-lbl">多通路整合</span><span class="sum-val">$3,000 / 通路</span></div>`:''}
       `:''}
+      <div class="sum-row"><span class="sum-lbl">通知方式</span><span class="sum-val">${[notifyEmail?'Email':'',notifyLine?'LINE':'',notifySms?'簡訊':''].filter(Boolean).join('、')||'（未選擇）'}${notifySms&&smsPlan?` · ${SMS_PLANS.find(p=>p.id===smsPlan)?.price||''}`:''}</span></div>
     </div>
     ${isMiezo?`<div class="summary-box"><div class="sum-total"><span class="sum-lbl">合計（稅前預估）</span><span class="sum-val">$${c.total.toLocaleString()}</span></div></div>
     <div class="notice notice-red">⚠️ 此為發票預估報價，款項實際需以鯨躍合約為主。</div>`:''}
@@ -591,6 +644,8 @@ function toggleDoc(id){
   inp.click();
 }
 function toggleAddon(id){if(addons.has(id))addons.delete(id);else addons.add(id);renderStep();}
+function toggleNotify(type){if(type==='email')notifyEmail=!notifyEmail;else if(type==='line')notifyLine=!notifyLine;else{notifySms=!notifySms;if(!notifySms)smsPlan='';}renderStep();}
+function setSmsPlan(id){smsPlan=id;renderStep();}
 function saveStep1Fields(){
   const t=document.getElementById('f-taxid');      if(t)formTaxId=t.value;
   const z=document.getElementById('f-brand-zh');   if(z)formBrandZh=z.value;
@@ -599,6 +654,12 @@ function saveStep1Fields(){
   const p=document.getElementById('f-phone');      if(p)formPhone=p.value;
   const c=document.getElementById('f-contact');    if(c)formContact=c.value;
   const a=document.getElementById('f-address');    if(a)formAddress=a.value;
+}
+function setApplicantType(t){
+  if(cur===1)saveStep1Fields();
+  applicantType=t;
+  formTaxId='';
+  renderStep();
 }
 function togglePay(id){
   if(cur===1)saveStep1Fields();
@@ -632,7 +693,9 @@ async function next(){
     const contact=(document.getElementById('f-contact')?.value||'').trim();
     const address=(document.getElementById('f-address')?.value||'').trim();
     const err=(id,msg)=>{document.getElementById(id).style.borderColor='var(--red)';alert(msg);};
-    if(!taxId||!/^\d{8}$/.test(taxId)){err('f-taxid','請輸入正確的 8 碼統編');return;}
+    if(!applicantType){alert('請先選擇申請類型（公司 / 個人）');return;}
+    if(applicantType==='company'){if(!taxId||!/^\d{8}$/.test(taxId)){err('f-taxid','請輸入正確的 8 碼統編');return;}}
+    else{if(!taxId||!/^[A-Z][0-9]{9}$/.test(taxId)){err('f-taxid','請輸入正確的身分證字號格式，例：A123456789');return;}}
     if(!email){err('f-email','請填寫客服信箱');return;}
     if(!/^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$/.test(email)){err('f-email','請輸入正確的信箱格式');return;}
     if(!brandZh){err('f-brand-zh','請填寫品牌名稱（中文）');return;}
@@ -644,7 +707,7 @@ async function next(){
     if(selectedPayments.size===0){alert('請至少選擇一項金流服務');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
-      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
+      const res=await fetch('/api/clients/step1',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tax_id:taxId,applicant_type:applicantType,brand_name_zh:brandZh,brand_name_en:brandEn,contact_email:email||null,contact_phone:phone||null,contact_person:contact||null,store_address:address||null,payment_methods:[...selectedPayments],payment_form_submitted:selectedPayments.has('cc')})});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
       formTaxId=taxId;formBrandZh=brandZh;formBrandEn=brandEn;formEmail=email;formPhone=phone;
       formContact=contact;formAddress=address;
@@ -652,7 +715,9 @@ async function next(){
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===2){
-    const miss=DOCS.filter(d=>!d.optional&&!uploadedDocs.has(d.id));
+    const isNonePay=selectedPayments.has('none');
+    const checkDocs=isNonePay?DOCS.filter(d=>d.id==='logo'||d.id==='scene'):DOCS;
+    const miss=checkDocs.filter(d=>!d.optional&&!uploadedDocs.has(d.id));
     if(miss.length){alert('請先上傳必要文件：'+miss.map(d=>d.name).join('、'));return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
@@ -683,10 +748,19 @@ async function next(){
     }catch{alert('連線失敗，請稍後再試');}
     finally{bn.disabled=false;bn.textContent='下一步 →';}
   }else if(cur===5){
+    if(notifySms&&!smsPlan){alert('請選擇簡訊方案');return;}
+    bn.disabled=true;bn.textContent='送出中...';
+    try{
+      const res=await fetch(`/api/clients/step5/${formTaxId}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({notify_email:notifyEmail,notify_line:notifyLine,notify_sms:notifySms,sms_plan:smsPlan||null})});
+      if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
+      cur++;renderStep();
+    }catch{alert('連線失敗，請稍後再試');}
+    finally{bn.disabled=false;bn.textContent='下一步 →';}
+  }else if(cur===6){
     if(!formTaxId){alert('申請資料遺失，請重新填寫');return;}
     bn.disabled=true;bn.textContent='送出中...';
     try{
-      const res=await fetch(`/api/clients/step5/${formTaxId}`,{method:'POST'});
+      const res=await fetch(`/api/clients/step6/${formTaxId}`,{method:'POST'});
       if(!res.ok){const d=await res.json();alert(apiErr(d));return;}
       document.getElementById('fw').style.display='none';
       document.getElementById('success').style.display='block';
@@ -696,7 +770,7 @@ async function next(){
 }
 function prev(){if(cur>1){if(cur===5&&invoiceType&&invoiceType!=='miezo')cur=3;else cur--;renderStep();}}
 function resetForm(){
-  cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';
+  cur=1;sliderIdx=0;yearIdx=0;addons=new Set();uploadedDocs=new Set();selectedPayments=new Set();invoiceType='';applicantType='';notifyEmail=false;notifyLine=false;notifySms=false;smsPlan='';
   formTaxId='';formBrandZh='';formBrandEn='';formEmail='';formPhone='';
   formContact='';formAddress='';
   document.getElementById('fw').style.display='block';document.getElementById('success').style.display='none';

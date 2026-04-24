@@ -6,7 +6,7 @@ from database import get_db
 from models import ClientApplication, ApplicationStatus
 from schemas import (
     Step1PaymentSchema, Step3InvoiceSchema, Step4AddonSchema,
-    ApplicationQueryOut, MessageResponse,
+    Step5NotifySchema, ApplicationQueryOut, MessageResponse,
 )
 
 router = APIRouter()
@@ -43,6 +43,7 @@ def submit_step1(payload: Step1PaymentSchema, db: Session = Depends(get_db)):
 
     if existing:
         # 更新
+        existing.applicant_type  = payload.applicant_type
         existing.brand_name_zh = payload.brand_name_zh
         existing.brand_name_en = payload.brand_name_en
         existing.contact_email  = str(payload.contact_email) if payload.contact_email else None
@@ -61,6 +62,7 @@ def submit_step1(payload: Step1PaymentSchema, db: Session = Depends(get_db)):
         # 新建
         app = ClientApplication(
             tax_id=payload.tax_id,
+            applicant_type=payload.applicant_type,
             brand_name_zh=payload.brand_name_zh,
             brand_name_en=payload.brand_name_en,
             contact_email=str(payload.contact_email) if payload.contact_email else None,
@@ -120,8 +122,22 @@ def submit_step4(tax_id: str, payload: Step4AddonSchema, db: Session = Depends(g
     return MessageResponse(message="加值服務已儲存")
 
 
-# ── Step 5: 確認送出 ────────────────────────────────────────────
+# ── Step 5: 通知方式 ────────────────────────────────────────────
 @router.post("/step5/{tax_id}", response_model=MessageResponse)
+def submit_step5(tax_id: str, payload: Step5NotifySchema, db: Session = Depends(get_db)):
+    """儲存通知方式選擇"""
+    app = get_or_404(db, tax_id)
+    app.notify_email    = payload.notify_email
+    app.notify_line     = payload.notify_line
+    app.notify_sms      = payload.notify_sms
+    app.sms_plan        = payload.sms_plan
+    app.current_step    = max(app.current_step, 6)
+    db.commit()
+    return MessageResponse(message="通知方式已儲存")
+
+
+# ── Step 6: 確認送出 ────────────────────────────────────────────
+@router.post("/step6/{tax_id}", response_model=MessageResponse)
 def submit_final(tax_id: str, db: Session = Depends(get_db)):
     """最終送出申請"""
     app = get_or_404(db, tax_id)
@@ -130,7 +146,7 @@ def submit_final(tax_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="此申請已送出或審核中，無法重複送出")
 
     app.status       = ApplicationStatus.reviewing
-    app.current_step = 5
+    app.current_step = 6
     app.submitted_at = datetime.utcnow()
     db.commit()
     return MessageResponse(message="申請已送出，我們將盡快審核並與您聯繫")

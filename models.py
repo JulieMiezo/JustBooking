@@ -47,7 +47,8 @@ class ClientApplication(Base):
     id              = Column(Integer, primary_key=True, index=True)
 
     # 基本資訊（從金流表單取得）
-    tax_id          = Column(String(8), unique=True, nullable=False, index=True, comment="統一編號")
+    tax_id          = Column(String(20), unique=True, nullable=False, index=True, comment="統編或身分證字號")
+    applicant_type  = Column(String(10), nullable=True, comment="申請人類型 company/person")
     brand_name_zh   = Column(String(100), comment="品牌中文名稱")
     brand_name_en   = Column(String(100), comment="品牌英文名稱")
     contact_email   = Column(String(150), comment="客服信箱")
@@ -71,6 +72,12 @@ class ClientApplication(Base):
     addon_print_invoice = Column(Boolean, default=False, comment="列印中獎發票")
     addon_pdf_send      = Column(Boolean, default=False, comment="統編PDF寄送")
     addon_multi_channel = Column(Boolean, default=False, comment="多通路整合")
+
+    # 通知方式
+    notify_email        = Column(Boolean, default=False, comment="Email 通知")
+    notify_line         = Column(Boolean, default=False, comment="LINE 通知")
+    notify_sms          = Column(Boolean, default=False, comment="簡訊通知")
+    sms_plan            = Column(String(10), nullable=True, comment="簡訊方案 3000/6000/12000")
 
     # 申請狀態
     status          = Column(

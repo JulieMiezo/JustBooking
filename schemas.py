@@ -17,7 +17,8 @@ class TokenResponse(BaseModel):
 
 # ── Step 1: 金流申請 ────────────────────────────────────────────
 class Step1PaymentSchema(BaseModel):
-    tax_id:               str = Field(..., min_length=8, max_length=8, pattern=r'^\d{8}$', description="8碼統編")
+    tax_id:               str = Field(..., min_length=8, max_length=20, description="統一編號或身分證字號")
+    applicant_type:       Optional[str] = Field(None, max_length=10, description="company/person")
     brand_name_zh:        Optional[str] = Field(None, max_length=100)
     brand_name_en:        Optional[str] = Field(None, max_length=100)
     contact_email:        Optional[EmailStr] = None
@@ -45,8 +46,16 @@ class Step4AddonSchema(BaseModel):
     addon_multi_channel: bool = False
 
 
-# ── Step 5: 確認送出 ─────────────────────────────────────────────
-class Step5SubmitSchema(BaseModel):
+# ── Step 5: 通知方式 ─────────────────────────────────────────────
+class Step5NotifySchema(BaseModel):
+    notify_email: bool = False
+    notify_line:  bool = False
+    notify_sms:   bool = False
+    sms_plan:     Optional[str] = Field(None, max_length=10)
+
+
+# ── Step 6: 確認送出 ─────────────────────────────────────────────
+class Step6SubmitSchema(BaseModel):
     confirmed: bool = True
 
 
@@ -75,6 +84,10 @@ class ApplicationQueryOut(BaseModel):
     addon_print_invoice: bool
     addon_pdf_send:   bool
     addon_multi_channel: bool
+    notify_email:     bool
+    notify_line:      bool
+    notify_sms:       bool
+    sms_plan:         Optional[str]
     status:           ApplicationStatus
     current_step:     int
     submitted_at:     Optional[datetime]
@@ -114,6 +127,10 @@ class ApplicationDetail(ApplicationListItem):
     addon_print_invoice: bool
     addon_pdf_send:     bool
     addon_multi_channel: bool
+    notify_email:       bool
+    notify_line:        bool
+    notify_sms:         bool
+    sms_plan:           Optional[str]
     admin_note:         Optional[str]
     documents:          List[DocumentOut] = []
 
