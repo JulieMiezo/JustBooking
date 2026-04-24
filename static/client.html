@@ -209,6 +209,12 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 /* Back button */
 .back-btn{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);padding:0;line-height:1;transition:color .2s;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:14px;font-weight:600;}
 .back-btn:hover{color:var(--blue);}
+body.landing-mode{background:linear-gradient(145deg,#f8f4e8 0%,#fdf9f0 40%,#eef5fc 100%);transition:background .4s;}
+body.landing-mode .hd{background:rgba(255,255,255,.75);backdrop-filter:blur(12px);border-bottom-color:rgba(232,234,237,.6);}
+.landing-card-icon{width:58px;height:58px;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;flex-shrink:0;}
+.landing-card .arrow{margin-top:18px;font-size:13px;font-weight:700;color:var(--text3);transition:color .2s,transform .2s;display:inline-block;}
+.landing-card:hover .arrow{color:var(--blue);transform:translateX(4px);}
+.landing-card:nth-child(2):hover .arrow{color:var(--gold);}
 
 @media(max-width:600px){
   .fg2{grid-template-columns:1fr;}
@@ -246,36 +252,34 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
       <h1 style="font-size:28px;font-weight:900;color:var(--text);margin-bottom:10px;line-height:1.3">客戶建置申請系統</h1>
       <p style="font-size:15px;color:var(--text2);line-height:1.7">請選擇您要進行的操作</p>
     </div>
-    <!-- Options - lightweight row style -->
-    <div style="max-width:520px;margin:0 auto;display:grid;gap:12px;">
-      <div onclick="showQuery()" style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#fff;border:1.5px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);"
-        onmouseover="this.style.borderColor='rgb(96,177,220)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(96,177,220,.15)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow='var(--shadow)'">
-        <div style="width:48px;height:48px;border-radius:12px;background:var(--blue-l);border:1px solid var(--blue-m);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">🔍</div>
-        <div>
-          <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:3px">查詢申請進度</div>
-          <div style="font-size:13px;color:var(--text2)">已送出申請的客戶，輸入統編查看目前狀態</div>
+    <!-- Options -->
+    <div class="landing-wrap" style="padding-bottom:48px;">
+      <div class="landing-grid">
+        <div class="landing-card" onclick="showQuery()">
+          <div class="landing-card-icon" style="background:var(--blue-l);border:1.5px solid var(--blue-m);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="rgb(96,177,220)" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.242 1.656a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"/></svg>
+          </div>
+          <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:8px;">查詢申請進度</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;">已送出申請的客戶<br>輸入統編查看目前審核狀態</div>
+          <div class="arrow">→</div>
         </div>
-        <div style="margin-left:auto;color:var(--text3);font-size:18px;flex-shrink:0">→</div>
-      </div>
-      <div onclick="showForm()" style="display:flex;align-items:center;gap:16px;padding:20px 24px;background:#fff;border:1.5px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);"
-        onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(221,175,40,.15)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow='var(--shadow)'">
-        <div style="width:48px;height:48px;border-radius:12px;background:var(--gold-l);border:1px solid var(--gold-m);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg></div>
-        <div>
-          <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:3px">我要新申請</div>
-          <div style="font-size:13px;color:var(--text2)">尚未申請的新客戶，依步驟填寫建置資料</div>
+        <div class="landing-card" onclick="showForm()">
+          <div class="landing-card-icon" style="background:var(--gold-l);border:1.5px solid var(--gold-m);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="var(--gold-d)" viewBox="0 0 16 16"><path d="M5 4a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm-.5 2.5A.5.5 0 0 1 5 6h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zM5 8a.5.5 0 0 0 0 1h6a.5.5 0 0 0 0-1H5zm0 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1H5z"/><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2zm10-1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1z"/></svg>
+          </div>
+          <div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:8px;">我要新申請</div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;">尚未申請的新客戶<br>依步驟完成建置資料填寫</div>
+          <div class="arrow">→</div>
         </div>
-        <div style="margin-left:auto;color:var(--text3);font-size:18px;flex-shrink:0">→</div>
       </div>
-    </div>
-    <div style="text-align:center;margin-top:32px;">
-      <a href="/admin" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border:1px solid var(--border);border-radius:99px;font-size:12px;font-weight:500;color:var(--text3);text-decoration:none;background:#fff;transition:all .2s;"
-        onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'"
-        onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)';this.style.boxShadow='none'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/></svg>
-        管理者登入
-      </a>
+      <div style="text-align:center;margin-top:28px;">
+        <a href="/admin" style="display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border:1px solid var(--border);border-radius:99px;font-size:12px;font-weight:500;color:var(--text3);text-decoration:none;background:rgba(255,255,255,.8);transition:all .2s;"
+          onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text2)';this.style.boxShadow='0 2px 8px rgba(0,0,0,.08)'"
+          onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text3)';this.style.boxShadow='none'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" viewBox="0 0 16 16"><path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/><path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z"/></svg>
+          管理者登入
+        </a>
+      </div>
     </div>
   </div>
 
@@ -809,14 +813,15 @@ function resetForm(){
   showLanding();
 }
 function showLanding(){
+  document.body.classList.add('landing-mode');
   document.getElementById('landing').style.display='block';
   document.getElementById('query-view').style.display='none';
   document.getElementById('form-view').style.display='none';
   if(document.getElementById('query-result'))document.getElementById('query-result').innerHTML='';
   if(document.getElementById('query-tax'))document.getElementById('query-tax').value='';
 }
-function showQuery(){document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='block';document.getElementById('form-view').style.display='none';}
-function showForm(){document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='none';document.getElementById('form-view').style.display='block';renderStep();}
+function showQuery(){document.body.classList.remove('landing-mode');document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='block';document.getElementById('form-view').style.display='none';}
+function showForm(){document.body.classList.remove('landing-mode');document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='none';document.getElementById('form-view').style.display='block';renderStep();}
 
 async function doQuery(){
   const tax=(document.getElementById('query-tax').value||'').trim();
