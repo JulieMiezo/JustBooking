@@ -223,6 +223,26 @@ body.landing-mode .hd{background:rgba(255,255,255,.75);backdrop-filter:blur(12px
   .landing-grid{grid-template-columns:1fr;}
   .landing-card{padding:24px 16px;}
 }
+
+/* FAQ */
+.faq-search{width:100%;padding:11px 14px 11px 38px;border:1.5px solid var(--border);border-radius:9px;font-size:14px;font-family:inherit;outline:none;background:#fff;color:var(--text);transition:border-color .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%239aa3b0' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center;}
+.faq-search:focus{border-color:var(--blue);}
+.faq-cat{font-size:11px;font-weight:800;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;margin:24px 0 8px;padding-left:2px;}
+.faq-item{border:1.5px solid var(--border);border-radius:12px;background:#fff;margin-bottom:8px;overflow:hidden;transition:border-color .2s;}
+.faq-item.open{border-color:var(--blue-m);}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text);line-height:1.5;gap:12px;user-select:none;}
+.faq-q:hover{background:var(--bg2);}
+.faq-chevron{flex-shrink:0;width:18px;height:18px;color:var(--text3);transition:transform .22s;}
+.faq-item.open .faq-chevron{transform:rotate(180deg);color:var(--blue);}
+.faq-a{display:none;padding:0 18px 16px;font-size:13px;color:var(--text2);line-height:1.8;border-top:1px solid var(--border);}
+.faq-item.open .faq-a{display:block;}
+.faq-empty{text-align:center;padding:40px 0;font-size:14px;color:var(--text3);}
+.faq-landing-card{display:flex;align-items:center;gap:18px;background:#fff;border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;cursor:pointer;transition:all .22s;box-shadow:var(--shadow);margin-top:16px;}
+.faq-landing-card:hover{border-color:var(--blue-m);transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.faq-landing-icon{width:46px;height:46px;border-radius:12px;background:var(--bg2);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.faq-landing-text{flex:1;}
+.faq-landing-title{font-size:15px;font-weight:800;color:var(--text);margin-bottom:3px;}
+.faq-landing-desc{font-size:12px;color:var(--text2);}
 </style>
 </head>
 <body>
@@ -273,11 +293,33 @@ body.landing-mode .hd{background:rgba(255,255,255,.75);backdrop-filter:blur(12px
           <div class="arrow">→</div>
         </div>
       </div>
+      <div class="faq-landing-card" onclick="showFaq()">
+        <div class="faq-landing-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="var(--text3)" viewBox="0 0 16 16"><path d="M5.255 5.786a.237.237 0 0 0 .241.247h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286zm1.557 5.763c0 .533.425.927 1.01.927.609 0 1.028-.394 1.028-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94z"/><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zM2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8z"/></svg>
+        </div>
+        <div class="faq-landing-text">
+          <div class="faq-landing-title">常見問題</div>
+          <div class="faq-landing-desc">申請流程、所需文件、金流與發票說明</div>
+        </div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="var(--text3)" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/></svg>
+      </div>
 
     </div>
   </div>
 
-  <!-- ② 查詢 -->
+  <!-- ③ 常見問題 -->
+  <div id="faq-view" style="display:none">
+    <div class="ph" style="display:flex;align-items:center;gap:14px">
+      <button class="back-btn" onclick="showLanding()">← 返回</button>
+      <div><div class="pt">常見問題</div><div class="ps">申請流程與服務說明</div></div>
+    </div>
+    <div class="card" style="margin-top:0">
+      <input class="faq-search" id="faq-search" placeholder="搜尋問題…" oninput="renderFaq(this.value)">
+      <div id="faq-list"></div>
+    </div>
+  </div>
+
+    <!-- ② 查詢 -->
   <div id="query-view" style="display:none">
     <div class="ph" style="display:flex;align-items:center;gap:14px">
       <button class="back-btn" onclick="showLanding()">← 返回</button>
@@ -811,10 +853,73 @@ function showLanding(){
   document.getElementById('landing').style.display='block';
   document.getElementById('query-view').style.display='none';
   document.getElementById('form-view').style.display='none';
+  document.getElementById('faq-view').style.display='none';
   if(document.getElementById('query-result'))document.getElementById('query-result').innerHTML='';
   if(document.getElementById('query-tax'))document.getElementById('query-tax').value='';
 }
 function showQuery(){document.body.classList.remove('landing-mode');document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='block';document.getElementById('form-view').style.display='none';}
+
+function showFaq(){
+  document.body.classList.remove('landing-mode');
+  document.getElementById('landing').style.display='none';
+  document.getElementById('query-view').style.display='none';
+  document.getElementById('form-view').style.display='none';
+  document.getElementById('faq-view').style.display='block';
+  document.getElementById('faq-search').value='';
+  renderFaq('');
+}
+
+const FAQ_DATA=[
+  {cat:'申請流程',items:[
+    {q:'申請有哪些步驟？',a:'共 6 個步驟：① 填寫品牌資訊與選擇金流服務 → ② 上傳必要文件 → ③ 選擇發票方案 → ④ 加值服務 → ⑤ 選擇通知方式 → ⑥ 確認送出。每個步驟完成後可儲存，下次使用相同統編繼續填寫。'},
+    {q:'申請審核需要多久時間？',a:'資料送出後，我們的團隊通常於 3～5 個工作天內完成審核，並透過 Email 通知您結果。若資料不完整，我們會請您補件。'},
+    {q:'可以中途暫停後繼續填寫嗎？',a:'可以。每個步驟完成後系統會自動儲存，只要再次輸入相同的統一編號（或身分證字號），即可從上次進度繼續填寫。'},
+    {q:'個人申請和公司申請有什麼差別？',a:'公司 / 行號申請需提供統一編號（8 碼）及營業登記文件；個人申請使用身分證字號（10 碼），並需上傳身分證正反面。所需文件略有不同。'},
+  ]},
+  {cat:'所需文件',items:[
+    {q:'公司申請需要準備哪些文件？',a:'① 營業登記文件（商業登記或公司設立登記） ② 負責人身分證 ③ 銀行存摺封面（顯示戶名與帳號） ④ 品牌 Logo ⑤ 場域形象圖。'},
+    {q:'個人申請需要準備哪些文件？',a:'① 身分證正反面 ② 銀行存摺封面（顯示戶名與帳號） ③ 品牌 Logo ④ 場域形象圖。個人申請無需提供營業登記文件。'},
+    {q:'文件格式有什麼限制？',a:'Logo 請上傳圖片格式（JPG、PNG、WebP），其他文件可接受圖片或 PDF 格式。單一檔案建議不超過 10MB。'},
+  ]},
+  {cat:'金流服務',items:[
+    {q:'支援哪些金流服務？',a:'目前支援透過藍新金流（NewebPay）或綠界科技（ECPay）申請以下服務：信用卡、Apple Pay、LINE Pay、台灣 Pay（TWQR）、i 拍錢包（iPass）。可依需求選擇多種組合。'},
+    {q:'不申請金流，只申請發票或預約系統可以嗎？',a:'可以。申請時選擇「不串接金流」即可跳過金流申請步驟，僅申請電子發票或通知服務。'},
+    {q:'金流費率是多少？',a:'金流費率依各金流服務商規定為準，請參考藍新金流（neweb.com.tw）或綠界科技（ecpay.com.tw）官方公告。送出申請後我們的業務人員會與您詳細說明。'},
+  ]},
+  {cat:'電子發票',items:[
+    {q:'發票系統有哪些選擇？',a:'提供四種選項：① JustBooking 自有發票系統（miezo）② 串接藍新金流發票 ③ 串接綠界科技發票 ④ 不申請發票系統。方案依月開立張數分為 A～G 共 7 種，可選擇 1～3 年合約。'},
+    {q:'發票系統費用如何計算？',a:'依選擇的方案（A～G）及合約年限計算年費。簽 2 年享 95 折、簽 3 年享 9 折優惠。另有一次性設定費 $3,000。'},
+    {q:'加值服務是什麼？',a:'在 miezo 發票方案下可加購：① 中獎發票列印服務 ② 統編 PDF 電子寄送 ③ 多通路整合。選用後將併入合約項目。'},
+  ]},
+  {cat:'通知與客服',items:[
+    {q:'通知方式有哪些？',a:'提供三種方式通知您的預約使用者：① Email（免費） ② LINE 官方帳號通知（免費） ③ 簡訊通知（依方案計費，年費 $3,000 / $6,000 / $12,000）。至少需選擇一種。'},
+    {q:'申請送出後如何查詢進度？',a:'回到首頁點選「查詢申請進度」，輸入您的統一編號（或身分證字號）即可查看目前審核狀態。'},
+    {q:'有問題如何聯絡客服？',a:'請發信至 service@miezo.com.tw，或於上班時間（週一至週五 10:00～18:00）致電客服專線，我們將盡快為您服務。'},
+  ]},
+];
+
+function renderFaq(q){
+  const kw=(q||'').trim().toLowerCase();
+  const el=document.getElementById('faq-list');
+  let html='',total=0;
+  for(const cat of FAQ_DATA){
+    const items=cat.items.filter(it=>!kw||it.q.toLowerCase().includes(kw)||it.a.toLowerCase().includes(kw));
+    if(!items.length)continue;
+    total+=items.length;
+    html+=`<div class="faq-cat">${cat.cat}</div>`;
+    for(const it of items){
+      html+=`<div class="faq-item" onclick="toggleFaq(this)">
+        <div class="faq-q">${it.q}<svg class="faq-chevron" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg></div>
+        <div class="faq-a">${it.a}</div>
+      </div>`;
+    }
+  }
+  if(!total)html='<div class="faq-empty">找不到相關問題</div>';
+  el.innerHTML=html;
+}
+
+function toggleFaq(el){el.classList.toggle('open');}
+
 function showForm(){document.body.classList.remove('landing-mode');document.getElementById('landing').style.display='none';document.getElementById('query-view').style.display='none';document.getElementById('form-view').style.display='block';renderStep();}
 
 async function doQuery(){
