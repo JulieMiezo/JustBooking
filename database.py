@@ -15,7 +15,8 @@ SQLALCHEMY_DATABASE_URL = (
 connect_args = {}
 _ca_path = os.path.join(os.path.dirname(__file__), "server-ca.pem")
 if os.path.exists(_ca_path):
-    connect_args["ssl"] = {"ca": _ca_path}
+    # check_hostname=False:Cloud SQL 憑證是綁 instance 名稱,不是綁公開 IP,關掉才不會驗證失敗
+    connect_args["ssl"] = {"ca": _ca_path, "check_hostname": False}
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
