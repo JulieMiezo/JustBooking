@@ -23,6 +23,10 @@ uploads/
 # IDE
 .vscode/
 .idea/
+*.code-workspace
+
+# SSL certificates
+server-ca.pem
 
 # macOS
 .DS_Store
